@@ -1,379 +1,600 @@
-import React, { useState } from 'react';
-import { Card, CardContent } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+const Clock = ({ hours, minutes, isMoving = false }) => {
+  // Calculate total minutes for continuous rotation
+  const totalMinutes = hours * 60 + minutes;
+  const hourRotation = (totalMinutes / 60) * 30; // 30 degrees per hour
+  const minuteRotation = totalMinutes * 6; // 6 degrees per minute
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Stopwatch stem and button */}
+      <div className="relative mb-0">
+        <div className={`w-6 h-2 bg-[#5750E3] rounded-full ${isMoving ? 'button-press-animation' : ''}`} /> {/* Button */}
+        <div className="w-1 h-2 bg-[#5750E3] mx-auto" /> {/* Stem */}
+      </div>
+      <div className="w-[140px] h-[140px] bg-white rounded-full border-4 border-[#5750E3] flex items-center justify-center relative">
+        <div className="w-[120px] h-[120px] rounded-full bg-[#5750E3]/10 flex items-center justify-center relative">
+          {/* Clock numbers */}
+          {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => {
+            const angle = (num * 30) - 90; // -90 to start at top
+            const radius = 50; // Distance from center
+            const x = Math.cos(angle * Math.PI / 180) * radius;
+            const y = Math.sin(angle * Math.PI / 180) * radius;
+            return (
+              <div
+                key={num}
+                className="absolute text-[#5750E3] text-sm font-medium"
+                style={{
+                  transform: `translate(${x}px, ${y}px)`,
+                  transformOrigin: 'center',
+                }}
+              >
+                {num}
+              </div>
+            );
+          })}
+          
+          {/* Hour hand */}
+          <div
+            className={`absolute w-[1.5px] h-10 bg-[#5750E3] rounded-full`}
+            style={{
+              transform: `rotate(${hourRotation}deg)`,
+              transformOrigin: 'bottom center',
+              bottom: '50%',
+              willChange: 'transform',
+              transition: 'transform 200ms linear',
+            }}
+          />
+          
+          {/* Minute hand */}
+          <div
+            className={`absolute w-[1.5px] h-12 bg-[#5750E3] rounded-full`}
+            style={{
+              transform: `rotate(${minuteRotation}deg)`,
+              transformOrigin: 'bottom center',
+              bottom: '50%',
+              willChange: 'transform',
+              transition: 'transform 200ms linear',
+            }}
+          />
+          
+          {/* Center dot */}
+          <div className="absolute w-2.5 h-2.5 bg-[#5750E3] rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ElapsedTime = () => {
-  // Time generation functions
-  const generateRandomTime = () => {
-    const hours = Math.floor(Math.random() * 12) + 1;
-    const minutes = Math.floor(Math.random() * 60);
-    const ampm = Math.random() < 0.5 ? 'AM' : 'PM';
-    return {
-      hours: String(hours).padStart(2, '0'),
-      minutes: String(minutes).padStart(2, '0'),
-      ampm
-    };
-  };
+  const [showButton, setShowButton] = useState(true);
+  const [isButtonShrinking, setIsButtonShrinking] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [showEndTime, setShowEndTime] = useState(false);
+  const [showStartTime, setShowStartTime] = useState(false);
+  const [showClock, setShowClock] = useState(false);
+  const [isClockShrinking, setIsClockShrinking] = useState(false);
+  const [isTimeMovingUp, setIsTimeMovingUp] = useState(false);
+  const [showArrows, setShowArrows] = useState(false);
+  const [show24HourTimes, setShow24HourTimes] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [showSecondExplanation, setShowSecondExplanation] = useState(false);
+  const [showSecondContinue, setShowSecondContinue] = useState(false);
+  const [isSecondTextShrinking, setIsSecondTextShrinking] = useState(false);
+  const [isSecondButtonShrinking, setIsSecondButtonShrinking] = useState(false);
+  const [endTime, setEndTime] = useState({ hours: 12, minutes: 30 });
+  const [isMoving, setIsMoving] = useState(false);
+  const [showContinue, setShowContinue] = useState(false);
+  const [isContinueShrinking, setIsContinueShrinking] = useState(false);
+  const [hasReachedTarget, setHasReachedTarget] = useState(false);
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const startTime = { hours: 12, minutes: 30 }; // Static start time
+  const [showFirstTimes, setShowFirstTimes] = useState(true);
+  const [isFirstTimesShrinking, setIsFirstTimesShrinking] = useState(false);
+  const [showArrow, setShowArrow] = useState(false);
+  const [isArrowShrinking, setIsArrowShrinking] = useState(false);
 
-  const generateEndTime = (startTime) => {
-    const start = {
-      hours: parseInt(startTime.hours),
-      minutes: parseInt(startTime.minutes),
-      ampm: startTime.ampm
-    };
-
-    let end;
-    do {
-      end = generateRandomTime();
-    } while (
-      (start.ampm === 'PM' && end.ampm === 'AM') ||
-      (start.ampm === end.ampm && 
-        (parseInt(end.hours) < parseInt(start.hours) || 
-        (parseInt(end.hours) === parseInt(start.hours) && 
-         parseInt(end.minutes) <= parseInt(start.minutes))))
-    );
-
-    return end;
-  };
-
-  // Initialize state
-  const [showSteps, setShowSteps] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState({
-    step1: false,
-    step2: false
-  });
-  const [userInput1Start, setUserInput1Start] = useState('');
-  const [userInput1End, setUserInput1End] = useState('');
-  const [userInput2, setUserInput2] = useState('');
-  const [hasError, setHasError] = useState({
-    step1: false,
-    step2: false
-  });
-  const [startTime, setStartTime] = useState(generateRandomTime());
-  const [endTime, setEndTime] = useState(() => generateEndTime(startTime));
-  const [step1Answers, setStep1Answers] = useState({ start: '', end: '' });
-  const [step2Answers, setStep2Answers] = useState({ hours: '', minutes: '' });
-
-  // Convert to 24-hour format
-  const to24Hour = (time) => {
-    let hours = parseInt(time.hours);
-    // For PM: 1 PM to 11 PM add 12 hours (13:00 to 23:00)
-    // 12 PM (noon) stays as 12:00
-    if (time.ampm === 'PM' && hours !== 12) hours += 12;
-    // For AM: 12 AM (midnight) becomes 00:00
-    // 1 AM to 11 AM stay the same but need padding
-    if (time.ampm === 'AM' && hours === 12) hours = 0;
-    return {
-      hours: String(hours).padStart(2, '0'),
-      minutes: time.minutes
-    };
-  };
-
-  // Calculate elapsed time
-  const calculateElapsedTime = () => {
-    const start24 = to24Hour(startTime);
-    const end24 = to24Hour(endTime);
-    
-    let startMinutes = parseInt(start24.hours) * 60 + parseInt(start24.minutes);
-    let endMinutes = parseInt(end24.hours) * 60 + parseInt(end24.minutes);
-    
-    let diffMinutes = endMinutes - startMinutes;
-    if (diffMinutes < 0) diffMinutes += 24 * 60;
-    
-    return {
-      hours: Math.floor(diffMinutes / 60),
-      minutes: diffMinutes % 60
-    };
-  };
-
-  // Handler functions
-  const generateNewProblem = () => {
-    const newStartTime = generateRandomTime();
-    const newEndTime = generateEndTime(newStartTime);
-    setStartTime(newStartTime);
-    setEndTime(newEndTime);
-    setStep1Answers({ start: '', end: '' });
-    setStep2Answers({ hours: '', minutes: '' });
-    setCurrentStep(1);
-    setCompletedSteps({
-      step1: false,
-      step2: false
-    });
-    setUserInput1Start('');
-    setUserInput1End('');
-    setUserInput2('');
-    setHasError({
-      step1: false,
-      step2: false
-    });
-    setShowSteps(false);
-  };
-
-  const checkAnswer = (step) => {
-    let correct = false;
-    if (step === 1) {
-      const start24 = to24Hour(startTime);
-      const end24 = to24Hour(endTime);
-      const expectedStart = `${start24.hours}:${start24.minutes}`;
-      const expectedEnd = `${end24.hours}:${end24.minutes}`;
+  const handleClick = () => {
+    setIsButtonShrinking(true);
+    // Trigger initial button press animation
+    setIsButtonPressed(true);
+    setTimeout(() => {
+      setIsButtonPressed(false);
+      setShowButton(false);
       
-      const userStartAnswer = userInput1Start.replace(/\s+/g, '');
-      const userEndAnswer = userInput1End.replace(/\s+/g, '');
+      // Show clock with slower fade-in
+      setShowClock(true);
       
-      correct = userStartAnswer === expectedStart && userEndAnswer === expectedEnd;
-      
-      if (correct) {
-        setCompletedSteps(prev => ({ ...prev, step1: true }));
-        setCurrentStep(2);
-        setStep1Answers({
-          start: `${start24.hours}:${start24.minutes}`,
-          end: `${end24.hours}:${end24.minutes}`
-        });
-      }
+      // Show times after clock appears
+      setTimeout(() => {
+        setShowStartTime(true);
+        setShowEndTime(true);
+        
+        // Start clock animation after times appear
+        setTimeout(() => {
+          setIsButtonPressed(true); // Trigger button press animation
+          setTimeout(() => {
+            setIsButtonPressed(false);
+            setIsMoving(true);
+          }, 300);
+        }, 800);
+      }, 1000);
+    }, 200);
+  };
+
+  const handleContinue = () => {
+    if (showSecondContinue) {
+      setIsSecondTextShrinking(true);
+      setIsSecondButtonShrinking(true);
+      setIsContinueShrinking(true);
+      setIsArrowShrinking(true);
+      setTimeout(() => {
+        setShowSecondExplanation(false);
+        setShowSecondContinue(false);
+        setShowExplanation(false);
+        setShowArrow(false);
+      }, 500);
     } else {
-      const elapsed = calculateElapsedTime();
-      const expected = `${elapsed.hours} hours and ${elapsed.minutes} minutes`;
-      const userAnswer = userInput2.replace(/\s+/g, '').toLowerCase();
-      const expectedNormalized = expected.replace(/\s+/g, '').toLowerCase();
-      correct = userAnswer === expectedNormalized;
-      
-      if (correct) {
-        setCompletedSteps(prev => ({ ...prev, step2: true }));
-        setStep2Answers(elapsed);
-      }
+      setIsContinueShrinking(true);
+      setTimeout(() => {
+        setShowContinue(false);
+        setShowText(false);
+        setIsTimeMovingUp(true);
+        setTimeout(() => {
+          setShowArrows(true);
+          setShowArrow(true);
+          setTimeout(() => {
+            setShow24HourTimes(true);
+            setTimeout(() => {
+              setShowExplanation(true);
+              setShowSecondExplanation(true);
+              setTimeout(() => {
+                setShowSecondContinue(true);
+              }, 1200);
+            }, 500);
+          }, 500);
+        }, 500);
+      }, 300);
     }
-    setHasError(prev => ({ ...prev, [`step${step}`]: !correct }));
-    return correct;
   };
 
-  const showStep1Answer = () => {
-    const start24 = to24Hour(startTime);
-    const end24 = to24Hour(endTime);
-    setStep1Answers({
-      start: `${start24.hours}:${start24.minutes}`,
-      end: `${end24.hours}:${end24.minutes}`
-    });
-    setCompletedSteps(prev => ({ ...prev, step1: true }));
-    setCurrentStep(2);
-  };
+  useEffect(() => {
+    if (!isMoving) return;
 
-  const showStep2Answer = () => {
-    const elapsed = calculateElapsedTime();
-    setStep2Answers(elapsed);
-    setCompletedSteps(prev => ({ ...prev, step2: true }));
+    const interval = setInterval(() => {
+      setEndTime(prevTime => {
+        let newMinutes = prevTime.minutes + 1;
+        let newHours = prevTime.hours;
+        
+        if (newMinutes >= 60) {
+          newMinutes = 0;
+          newHours = (newHours + 1) % 24;
+        }
+
+        // Check if we've reached 1:05 PM (13:05)
+        if (newHours === 13 && newMinutes === 5) {
+          setIsMoving(false); // Stop the clock
+          setHasReachedTarget(true); // Mark that we've reached the target time
+          clearInterval(interval);
+          // Trigger final button press animation
+          setIsButtonPressed(true);
+          setTimeout(() => {
+            setIsButtonPressed(false);
+            // Show text after clock stops
+            setShowText(true);
+            // Show continue button after text appears
+            setTimeout(() => {
+              setShowContinue(true);
+            }, 1000);
+          }, 400);
+        }
+        
+        return { hours: newHours, minutes: newMinutes };
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [isMoving]);
+
+  const handleReset = () => {
+    // Reset all states to initial values
+    setShowButton(true);
+    setIsButtonShrinking(false);
+    setShowText(false);
+    setShowEndTime(false);
+    setShowStartTime(false);
+    setShowClock(false);
+    setIsClockShrinking(false);
+    setIsTimeMovingUp(false);
+    setShowArrows(false);
+    setShow24HourTimes(false);
+    setShowExplanation(false);
+    setShowSecondExplanation(false);
+    setShowSecondContinue(false);
+    setIsSecondTextShrinking(false);
+    setIsSecondButtonShrinking(false);
+    setEndTime({ hours: 12, minutes: 30 });
+    setIsMoving(false);
+    setShowContinue(false);
+    setIsContinueShrinking(false);
+    setHasReachedTarget(false);
+    setIsButtonPressed(false);
+    setShowFirstTimes(true);
+    setIsFirstTimesShrinking(false);
+    setShowArrow(false);
+    setIsArrowShrinking(false);
   };
 
   return (
-    <div className="bg-gray-100 p-8 w-full max-w-4xl mx-auto">
-      <Card className="w-full shadow-md bg-white">
-        <div className="bg-sky-50 p-6 rounded-t-lg">
-          <h1 className="text-sky-900 text-2xl font-bold">Elapsed Time</h1>
-          <p className="text-sky-800">Learn how to calculate the time between two events!</p>
+    <div className="w-[464px] mx-auto mt-5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05)] bg-white rounded-lg select-none">
+      <style>
+        {`
+          @keyframes shrinkButton {
+            from {
+              transform: scale(1);
+              opacity: 1;
+            }
+            to {
+              transform: scale(0);
+              opacity: 0;
+            }
+          }
+          .shrink-animation {
+            animation: shrinkButton 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .text-animation {
+            animation: fadeIn 0.5s ease-out forwards;
+          }
+          @keyframes growButton {
+            from {
+              transform: scale(0);
+              opacity: 0;
+            }
+            to {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+          .continue-animation {
+            animation: growButton 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes buttonPress {
+            0% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(4px);
+            }
+            75% {
+              transform: translateY(1px);
+            }
+            100% {
+              transform: translateY(0);
+            }
+          }
+          .button-press-animation {
+            animation: buttonPress 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+          @keyframes shrinkText {
+            from {
+              transform: scale(1);
+              opacity: 1;
+            }
+            to {
+              transform: scale(0);
+              opacity: 0;
+            }
+          }
+          @keyframes moveToTop {
+            from {
+              transform: translateY(0);
+            }
+            to {
+              transform: translateY(-50px);
+            }
+          }
+          @keyframes fadeInArrow {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .text-shrink {
+            animation: shrinkText 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          .move-to-top {
+            animation: moveToTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          .clock-shrink {
+            animation: shrinkButton 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          .arrow-fade-in {
+            animation: fadeInArrow 0.5s ease-out forwards;
+          }
+          @keyframes fadeInDown {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .fade-in-down {
+            animation: fadeInDown 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          }
+          .explore-button {
+            background-color: #008545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .explore-button:hover {
+            background-color: #00783E;
+          }
+          .glow-button { 
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            transition: all .3s ease;
+            padding: 7px;
+          }
+          .glow-button::before {
+            content: "";
+            display: block;
+            position: absolute;
+            background: #fff;
+            inset: 2px;
+            border-radius: 4px;
+            z-index: -2;
+          }
+          @property --r {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+          }
+          .simple-glow { 
+            background: conic-gradient(
+              from var(--r),
+              transparent 0%,
+              rgb(0, 255, 132) 2%,
+              rgb(0, 214, 111) 8%,
+              rgb(0, 174, 90) 12%,
+              rgb(0, 133, 69) 14%,
+              transparent 15%
+            );
+            animation: rotating 3s linear infinite;
+            transition: animation 0.3s ease;
+          }
+          .simple-glow.stopped {
+            animation: none;
+            background: none;
+          }
+          @keyframes rotating {
+            0% {
+              --r: 0deg;
+            }
+            100% {
+              --r: 360deg;
+            }
+          }
+          .reset-button {
+            background-color: #6B7280;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: background-color 0.2s;
+            margin-left: auto;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            line-height: 1;
+          }
+          .reset-button:hover {
+            background-color: #4B5563;
+          }
+          .reset-button:disabled {
+            background-color: #6B7280;
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+          .clock-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+          }
+          @keyframes growIn {
+            from {
+              transform: scale(0.8);
+              opacity: 0;
+            }
+            to {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+          .grow-in {
+            animation: growIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes clockGrowIn {
+            from {
+              transform: scale(0.6);
+              opacity: 0;
+            }
+            to {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+          .clock-grow-in {
+            animation: clockGrowIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+        `}
+      </style>
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-[#5750E3] text-sm font-medium select-none">Elapsed Time Explorer</h2>
+          <button 
+            className="text-gray-500 hover:text-gray-700 text-sm px-3 py-1 rounded border border-gray-300 hover:border-gray-400 transition-colors"
+            onClick={handleReset}
+            title="Reset interactive"
+          >
+            Reset
+          </button>
         </div>
-        <CardContent className="space-y-6 pt-6">
-          <div className="bg-blue-50 p-4 rounded border border-blue-200">
-            <h2 className="text-blue-900 font-bold mb-2">What is Elapsed Time?</h2>
-            <p className="text-blue-600">
-              Elapsed time is the amount of time that passes between the start and end of an event.
-              It tells us how long something took from beginning to end. Practice calculating elapsed time below!
-            </p>
-          </div>
-          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-bold mb-4">Example</h2>
-            <Card className="border border-gray-200">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="mt-8 mb-6">
-                    <p className="text-lg font-bold mb-2">Given:</p>
-                    <p className="text-lg">Start time = 9:30 AM</p>
-                    <p className="text-lg">End time = 2:45 PM</p>
+
+        <div className="space-y-4">
+          {/* Visual Section */}
+          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden">
+            <div className="relative w-[400px] h-[260px] bg-white">
+              <div className="absolute left-[8%] top-[20%]">
+                {showClock && (
+                  <div className={isClockShrinking ? 'clock-shrink' : 'clock-grow-in'}>
+                    <Clock 
+                      hours={hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours)} 
+                      minutes={hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes)} 
+                      isMoving={isButtonPressed} 
+                    />
                   </div>
-                  <div>
-                    <p className="font-medium">Step 1: Convert to 24-hour format</p>
-                    <div className="p-4 my-2">
-                      <div className="bg-blue-50 p-3 rounded-lg mb-3 text-sm">
-                        <p className="font-medium mb-2">How to convert to 24-hour time:</p>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>For AM times: 12:00 AM is 00:00, other AM times stay the same (just add a 0 in front if needed)</li>
-                          <li>For PM times: Add 12 to the hours (except 12 PM stays as 12:00)</li>
-                        </ul>
-                      </div>
-                      <div className="font-mono">
-                        <p>9:30 AM = 09:30</p>
-                        <p>2:45 PM = 14:45</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="font-medium">Step 2: Subtract the times (put the bigger time on top)</p>
-                    <div className="p-4 my-2 font-mono">
-                      <div style={{ width: 'fit-content' }}>
-                        <div className="text-right tabular-nums">14:45</div>
-                        <div className="text-right tabular-nums">- 9:30</div>
-                        <div className="border-t border-gray-400 mt-1 mb-0">
-                          <div className="text-right tabular-nums">5:15</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="font-bold text-green-600 mt-4">
-                    Therefore, the elapsed time is 5 hours and 15 minutes
-                  </p>
+                )}
+              </div>
+              {showButton && (
+                <div className={`glow-button ${isButtonShrinking ? 'simple-glow stopped' : 'simple-glow'}`}>
+                  <button 
+                    className={`explore-button select-none ${isButtonShrinking ? 'shrink-animation' : 'continue-animation'}`}
+                    onClick={handleClick}
+                    style={{ transformOrigin: 'center' }}
+                  >
+                    Click to Explore!
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+              {showContinue && (
+                <div className={`glow-button ${isContinueShrinking ? 'simple-glow stopped' : 'simple-glow'}`}>
+                  <button 
+                    className={`explore-button select-none ${isContinueShrinking ? 'shrink-animation' : 'continue-animation'}`}
+                    onClick={handleContinue}
+                    style={{ transformOrigin: 'center' }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              )}
+              {showSecondContinue && (
+                <div className={`glow-button ${isSecondButtonShrinking ? 'simple-glow stopped' : 'simple-glow'}`}>
+                  <button 
+                    className={`explore-button select-none ${isSecondButtonShrinking ? 'shrink-animation' : 'continue-animation'}`}
+                    onClick={handleContinue}
+                    style={{ transformOrigin: 'center' }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              )}
+              {showEndTime && showFirstTimes && (
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-500 text-sm font-medium">End Time:</span>
+                    <span className="text-red-500 text-sm font-medium">
+                      {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {showStartTime && showFirstTimes && (
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-500 text-sm font-medium">Start Time:</span>
+                    <span className="text-blue-500 text-sm font-medium">
+                      {`${startTime.hours % 12 || 12}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {isTimeMovingUp && showArrows && showArrow && (
+                <div className={`absolute left-[205px] top-[118px] flex flex-col items-start gap-2 ${isArrowShrinking ? 'text-shrink' : 'arrow-fade-in'}`}>
+                  <div className="ml-12">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#5750E3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
+              {isTimeMovingUp && show24HourTimes && (
+                <div className="absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 text-animation">
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-500 text-sm font-medium">End Time:</span>
+                    <span className="text-red-500 text-sm font-medium">
+                      {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {isTimeMovingUp && show24HourTimes && (
+                <div className="absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 text-animation">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-500 text-sm font-medium">Start Time:</span>
+                    <span className="text-blue-500 text-sm font-medium">
+                      {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-purple-900 font-bold">Practice Time!</h2>
-              <Button 
-                onClick={generateNewProblem}
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                New Problem
-              </Button>
-            </div>
-
-            <div className="text-center text-2xl mb-4 space-y-2">
-              <div className="font-mono">
-                Start Time: {startTime.hours}:{startTime.minutes} {startTime.ampm}
+          {/* Text Section */}
+          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md p-4 min-h-[55px] relative">
+            {showText && (
+              <div className={`text-sm text-gray-600 ${isContinueShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
+                <div>
+                  <span className="font-bold text-black">Elapsed time</span> is the amount of time that passes between the <span className="text-blue-500">start</span> and <span className="text-red-500">end</span> of an event.
+                </div>
               </div>
-              <div className="font-mono">
-                End Time: {endTime.hours}:{endTime.minutes} {endTime.ampm}
-              </div>
-            </div>
-
-            <Button 
-              onClick={() => setShowSteps(true)}
-              className="w-full bg-blue-950 hover:bg-blue-900 text-white py-3"
-            >
-              Solve Step by Step
-            </Button>
-
-            {showSteps && (
-              <div className="bg-purple-50 p-4 rounded-lg mt-4">
-                <p className="mb-4">1. Convert to 24-hour format:</p>
-                {completedSteps.step1 ? (
-                  <div className="text-green-600 font-bold mb-6 space-y-1">
-                    <p>{step1Answers.start}</p>
-                    <p>{step1Answers.end}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4 mb-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Start Time (24h)</label>
-                      <div className="flex items-center gap-4">
-                        <Input 
-                          type="text"
-                          value={userInput1Start}
-                          onChange={(e) => {
-                            setUserInput1Start(e.target.value);
-                            setHasError(prev => ({ ...prev, step1: false }));
-                          }}
-                          placeholder="e.g., 09:30"
-                          className={`flex-1 ${hasError.step1 ? 'border-red-500' : 'border-blue-300'}`}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">End Time (24h)</label>
-                      <div className="flex items-center gap-4">
-                        <Input 
-                          type="text"
-                          value={userInput1End}
-                          onChange={(e) => {
-                            setUserInput1End(e.target.value);
-                            setHasError(prev => ({ ...prev, step1: false }));
-                          }}
-                          placeholder="e.g., 14:45"
-                          className={`flex-1 ${hasError.step1 ? 'border-red-500' : 'border-blue-300'}`}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={() => checkAnswer(1)}
-                        className="bg-blue-400 hover:bg-blue-500 flex-1"
-                      >
-                        Check
-                      </Button>
-                      <Button
-                        onClick={() => showStep1Answer()}
-                        className="bg-gray-400 hover:bg-gray-500 text-white flex-1"
-                      >
-                        Skip
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {currentStep >= 2 && (
-                  <>
-                    <p className="mb-4">2. Calculate the elapsed time:</p>
-                    <div className="p-4 font-mono">
-                      <div style={{ width: 'fit-content' }}>
-                        <div className="text-right tabular-nums">{step1Answers.end}</div>
-                        <div className="text-right tabular-nums">- {step1Answers.start}</div>
-                        <div className="border-t border-gray-400 mt-1 mb-0">
-                          <div className="text-right tabular-nums">??:??</div>
-                        </div>
-                      </div>
-                    </div>
-                    {completedSteps.step2 ? (
-                      <>
-                        <p className="text-green-600 font-bold mb-6">
-                          {step2Answers.hours} hours and {step2Answers.minutes} minutes
-                        </p>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-                          <h3 className="text-green-800 text-xl font-bold">Great Work!</h3>
-                          <p className="text-green-700">
-                            You've successfully calculated the elapsed time!
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-4 mb-6">
-                        <Input 
-                          type="text"
-                          value={userInput2}
-                          onChange={(e) => {
-                            setUserInput2(e.target.value);
-                            setHasError(prev => ({ ...prev, step2: false }));
-                          }}
-                          placeholder="e.g., 5 hours and 15 minutes"
-                          className={`flex-1 ${hasError.step2 ? 'border-red-500' : 'border-blue-300'}`}
-                        />
-                        <div className="flex gap-4">
-                          <Button
-                            onClick={() => checkAnswer(2)}
-                            className="bg-blue-400 hover:bg-blue-500"
-                          >
-                            Check
-                          </Button>
-                          <Button
-                            onClick={() => showStep2Answer()}
-                            className="bg-gray-400 hover:bg-gray-500 text-white"
-                          >
-                            Skip
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
+            )}
+            
+            {showExplanation && (
+              <div className={`text-sm text-gray-600 ${isSecondTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
+                <div>
+                  We can subtract the <span className="text-blue-500">start time</span> from the <span className="text-red-500">end time</span> to find the <span className="font-bold text-black">elapsed time</span>, but first we need to convert both times into a 24 hour format.  
+                </div>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
-      <p className="text-center text-gray-600 mt-4">
-        Understanding elapsed time is essential for scheduling and time management!
-      </p>
+        </div>
+      </div>
     </div>
   );
 };
