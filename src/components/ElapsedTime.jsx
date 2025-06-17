@@ -96,6 +96,16 @@ const ElapsedTime = () => {
   const [isFirstTimesShrinking, setIsFirstTimesShrinking] = useState(false);
   const [showArrow, setShowArrow] = useState(false);
   const [isArrowShrinking, setIsArrowShrinking] = useState(false);
+  const [is24HourTimesRising, setIs24HourTimesRising] = useState(false);
+  const [showUnderline, setShowUnderline] = useState(false);
+  const [showElapsedTime, setShowElapsedTime] = useState(false);
+  const [showFinalText, setShowFinalText] = useState(false);
+  const [showFinalContinue, setShowFinalContinue] = useState(false);
+  const [isFinalTextShrinking, setIsFinalTextShrinking] = useState(false);
+  const [isFinalButtonShrinking, setIsFinalButtonShrinking] = useState(false);
+  const [hideUnderline, setHideUnderline] = useState(false);
+  const [isElapsedTimeRising, setIsElapsedTimeRising] = useState(false);
+  const [showCompletionText, setShowCompletionText] = useState(false);
 
   const handleClick = () => {
     setIsButtonShrinking(true);
@@ -130,12 +140,42 @@ const ElapsedTime = () => {
       setIsSecondTextShrinking(true);
       setIsSecondButtonShrinking(true);
       setIsContinueShrinking(true);
+      setIsFirstTimesShrinking(true);
       setIsArrowShrinking(true);
+      
       setTimeout(() => {
         setShowSecondExplanation(false);
         setShowSecondContinue(false);
         setShowExplanation(false);
         setShowArrow(false);
+        setShowFirstTimes(false);
+        setIs24HourTimesRising(true);
+        setTimeout(() => {
+          setShowUnderline(true);
+          setTimeout(() => {
+            setShowElapsedTime(true);
+            setTimeout(() => {
+              setShowFinalText(true);
+              setTimeout(() => {
+                setShowFinalContinue(true);
+              }, 1000);
+            }, 1000);
+          }, 500);
+        }, 500);
+      }, 500);
+    } else if (showFinalContinue) {
+      setIsFinalTextShrinking(true);
+      setIsFinalButtonShrinking(true);
+      setHideUnderline(true);
+      setTimeout(() => {
+        setIsElapsedTimeRising(true);
+        setTimeout(() => {
+          setShowFinalText(false);
+          setShowFinalContinue(false);
+          setTimeout(() => {
+            setShowCompletionText(true);
+          }, 500);
+        }, 500);
       }, 500);
     } else {
       setIsContinueShrinking(true);
@@ -226,6 +266,17 @@ const ElapsedTime = () => {
     setIsFirstTimesShrinking(false);
     setShowArrow(false);
     setIsArrowShrinking(false);
+    setIs24HourTimesRising(false);
+    setShowUnderline(false);
+    setShowElapsedTime(false);
+    setShowFinalText(false);
+    setShowFinalContinue(false);
+    setIsFinalTextShrinking(false);
+    setIsFinalButtonShrinking(false);
+    setHideUnderline(false);
+    setIsElapsedTimeRising(false);
+    setShowCompletionText(false);
+    setIs24HourTimesRising(false);
   };
 
   return (
@@ -447,6 +498,19 @@ const ElapsedTime = () => {
           }
           .grow-in {
             animation: growIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform-origin: center;
+          }
+          @keyframes growInLine {
+            from {
+              transform: scaleX(0);
+            }
+            to {
+              transform: scaleX(1);
+            }
+          }
+          .grow-in-line {
+            animation: growInLine 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform-origin: left;
           }
           @keyframes clockGrowIn {
             from {
@@ -460,6 +524,41 @@ const ElapsedTime = () => {
           }
           .clock-grow-in {
             animation: clockGrowIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes shiftRight {
+            from {
+              transform: translateX(0);
+            }
+            to {
+              transform: translateX(5px);
+            }
+          }
+          .shift-right {
+            animation: shiftRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes shrinkOut {
+            from {
+              transform: scaleX(1);
+              opacity: 1;
+            }
+            to {
+              transform: scaleX(0);
+              opacity: 0;
+            }
+          }
+          .shrink-out {
+            animation: shrinkOut 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes riseUp {
+            from {
+              transform: translate(0, 0);
+            }
+            to {
+              transform: translate(1px, -17px);
+            }
+          }
+          .rise-up {
+            animation: riseUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
         `}
       </style>
@@ -523,6 +622,17 @@ const ElapsedTime = () => {
                   </button>
                 </div>
               )}
+              {showFinalContinue && (
+                <div className={`glow-button ${isFinalButtonShrinking ? 'simple-glow stopped' : 'simple-glow'}`}>
+                  <button 
+                    className={`explore-button select-none ${isFinalButtonShrinking ? 'shrink-animation' : 'continue-animation'}`}
+                    onClick={handleContinue}
+                    style={{ transformOrigin: 'center' }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              )}
               {showEndTime && showFirstTimes && (
                 <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''}`}>
                   <div className="flex items-center gap-2">
@@ -544,7 +654,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && showArrows && showArrow && (
-                <div className={`absolute left-[205px] top-[118px] flex flex-col items-start gap-2 ${isArrowShrinking ? 'text-shrink' : 'arrow-fade-in'}`}>
+                <div className={`absolute left-[205px] top-[168px] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'text-shrink' : ''}`}>
                   <div className="ml-12">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#5750E3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -553,8 +663,8 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className="absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 text-animation">
-                  <div className="flex items-center gap-2">
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'}`}>
+                  <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className="text-red-500 text-sm font-medium">
                       {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
@@ -562,14 +672,25 @@ const ElapsedTime = () => {
                   </div>
                 </div>
               )}
+              {showUnderline && (
+                <>
+                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] w-[135px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
+                  <div className={`absolute left-[185px] top-[128px] w-[8px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
+                </>
+              )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className="absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 text-animation">
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className="text-blue-500 text-sm font-medium">
                       {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
                     </span>
                   </div>
+                </div>
+              )}
+              {showElapsedTime && (
+                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
+                  Elapsed Time: 0h 35m
                 </div>
               )}
             </div>
@@ -589,6 +710,22 @@ const ElapsedTime = () => {
               <div className={`text-sm text-gray-600 ${isSecondTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
                   We can subtract the <span className="text-blue-500">start time</span> from the <span className="text-red-500">end time</span> to find the <span className="font-bold text-black">elapsed time</span>, but first we need to convert both times into a 24 hour format.  
+                </div>
+              </div>
+            )}
+
+            {showFinalText && (
+              <div className={`text-sm text-gray-600 ${isFinalTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
+                <div>
+                  After subtracting, we make sure to take the absolute value of the result since there can be no negative time.
+                </div>
+              </div>
+            )}
+
+            {showCompletionText && (
+              <div className="text-sm text-gray-600 fade-in-down text-center">
+                <div>
+                  Now you know how to find <span className="font-bold text-black">elapsed time</span>!
                 </div>
               </div>
             )}
