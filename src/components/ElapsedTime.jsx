@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Clock = ({ hours, minutes, isMoving = false }) => {
+const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'normal' }) => {
   // Calculate total minutes for continuous rotation
   const totalMinutes = hours * 60 + minutes;
   const hourRotation = (totalMinutes / 60) * 30; // 30 degrees per hour
@@ -8,28 +8,65 @@ const Clock = ({ hours, minutes, isMoving = false }) => {
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const displayHours = hours % 12 || 12;
 
+  // Size configurations
+  const sizes = {
+    normal: {
+      outer: 'w-[140px] h-[140px]',
+      inner: 'w-[120px] h-[120px]',
+      button: 'w-6 h-2',
+      stem: 'w-1 h-2',
+      border: 'border-4',
+      numbers: 'text-sm',
+      hourHand: 'w-[1.5px] h-10',
+      minuteHand: 'w-[1.5px] h-12',
+      centerDot: 'w-2.5 h-2.5',
+      radius: 50
+    },
+    small: {
+      outer: 'w-[105px] h-[105px]',
+      inner: 'w-[90px] h-[90px]',
+      button: 'w-5 h-1.5',
+      stem: 'w-1 h-1.5',
+      border: 'border-2',
+      borderWidth: '3px',
+      numbers: 'text-xs',
+      hourHand: 'w-[1px] h-7.5',
+      minuteHand: 'w-[1px] h-9',
+      centerDot: 'w-2 h-2',
+      radius: 37.5
+    }
+  };
+
+  const config = sizes[size];
+
   return (
     <div className="flex flex-col items-center">
       {/* Stopwatch stem and button */}
       <div className="relative mb-0">
-        <div className={`w-6 h-2 bg-[#5750E3] rounded-full ${isMoving ? 'button-press-animation' : ''}`} /> {/* Button */}
-        <div className="w-1 h-2 bg-[#5750E3] mx-auto" /> {/* Stem */}
+        <div className={`${config.button} rounded-full ${isMoving ? 'button-press-animation' : ''}`} style={{ backgroundColor: color, transition: 'background-color 0.1s ease-in-out 0.2s' }} /> {/* Button */}
+        <div className={`${config.stem} mx-auto`} style={{ backgroundColor: color, transition: 'background-color 0.1s ease-in-out 0.2s' }} /> {/* Stem */}
       </div>
-      <div className="w-[140px] h-[140px] bg-white rounded-full border-4 border-[#5750E3] flex items-center justify-center relative">
-        <div className="w-[120px] h-[120px] rounded-full bg-[#5750E3]/10 flex items-center justify-center relative">
+      <div className={`${config.outer} bg-white rounded-full ${config.border} flex items-center justify-center relative`} style={{ 
+        borderColor: color, 
+        borderWidth: config.borderWidth || '4px',
+        transition: 'border-color 0.1s ease-in-out 0.2s' 
+      }}>
+        <div className={`${config.inner} rounded-full flex items-center justify-center relative`} style={{ backgroundColor: `${color}10`, transition: 'background-color 0.1s ease-in-out 0.2s' }}>
           {/* Clock numbers */}
           {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => {
             const angle = (num * 30) - 90; // -90 to start at top
-            const radius = 50; // Distance from center
+            const radius = config.radius; // Distance from center
             const x = Math.cos(angle * Math.PI / 180) * radius;
             const y = Math.sin(angle * Math.PI / 180) * radius;
             return (
               <div
                 key={num}
-                className="absolute text-[#5750E3] text-sm font-medium"
+                className={`absolute ${config.numbers} font-medium`}
                 style={{
                   transform: `translate(${x}px, ${y}px)`,
                   transformOrigin: 'center',
+                  color: color,
+                  transition: 'color 0.1s ease-in-out 0.2s',
                 }}
               >
                 {num}
@@ -39,30 +76,32 @@ const Clock = ({ hours, minutes, isMoving = false }) => {
           
           {/* Hour hand */}
           <div
-            className={`absolute w-[1.5px] h-10 bg-[#5750E3] rounded-full`}
+            className={`absolute ${config.hourHand} rounded-full`}
             style={{
               transform: `rotate(${hourRotation}deg)`,
               transformOrigin: 'bottom center',
               bottom: '50%',
               willChange: 'transform',
-              transition: 'transform 200ms linear',
+              transition: 'transform 200ms linear, background-color 0.1s ease-in-out 0.2s',
+              backgroundColor: color,
             }}
           />
           
           {/* Minute hand */}
           <div
-            className={`absolute w-[1.5px] h-12 bg-[#5750E3] rounded-full`}
+            className={`absolute ${config.minuteHand} rounded-full`}
             style={{
               transform: `rotate(${minuteRotation}deg)`,
               transformOrigin: 'bottom center',
               bottom: '50%',
               willChange: 'transform',
-              transition: 'transform 200ms linear',
+              transition: 'transform 200ms linear, background-color 0.1s ease-in-out 0.2s',
+              backgroundColor: color,
             }}
           />
           
           {/* Center dot */}
-          <div className="absolute w-2.5 h-2.5 bg-[#5750E3] rounded-full" />
+          <div className={`absolute ${config.centerDot} rounded-full`} style={{ backgroundColor: color, transition: 'background-color 0.1s ease-in-out 0.2s' }} />
         </div>
       </div>
     </div>
@@ -106,6 +145,10 @@ const ElapsedTime = () => {
   const [hideUnderline, setHideUnderline] = useState(false);
   const [isElapsedTimeRising, setIsElapsedTimeRising] = useState(false);
   const [showCompletionText, setShowCompletionText] = useState(false);
+  const [isClockShrinkingFinal, setIsClockShrinkingFinal] = useState(false);
+  const [isClockMovingUp, setIsClockMovingUp] = useState(false);
+  const [showSecondClock, setShowSecondClock] = useState(false);
+  const [clocksColored, setClocksColored] = useState(false);
 
   const handleClick = () => {
     setIsButtonShrinking(true);
@@ -166,15 +209,21 @@ const ElapsedTime = () => {
     } else if (showFinalContinue) {
       setIsFinalTextShrinking(true);
       setIsFinalButtonShrinking(true);
-      setHideUnderline(true);
+      setIsClockShrinkingFinal(true);
       setTimeout(() => {
-        setIsElapsedTimeRising(true);
+        setIsClockMovingUp(true);
         setTimeout(() => {
-          setShowFinalText(false);
-          setShowFinalContinue(false);
+          setShowSecondClock(true);
           setTimeout(() => {
-            setShowCompletionText(true);
-          }, 500);
+            setClocksColored(true);
+          }, 200);
+          setTimeout(() => {
+            setShowFinalText(false);
+            setShowFinalContinue(false);
+            setTimeout(() => {
+              setShowCompletionText(true);
+            }, 500);
+          }, 800);
         }, 500);
       }, 500);
     } else {
@@ -277,6 +326,10 @@ const ElapsedTime = () => {
     setIsElapsedTimeRising(false);
     setShowCompletionText(false);
     setIs24HourTimesRising(false);
+    setIsClockShrinkingFinal(false);
+    setIsClockMovingUp(false);
+    setShowSecondClock(false);
+    setClocksColored(false);
   };
 
   return (
@@ -560,6 +613,41 @@ const ElapsedTime = () => {
           .rise-up {
             animation: riseUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
+          @keyframes clockShrinkFinal {
+            from {
+              transform: scale(1);
+            }
+            to {
+              transform: scale(0.75);
+            }
+          }
+          .clock-shrink-final {
+            animation: clockShrinkFinal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes clockMoveUp {
+            from {
+              transform: translate(0, 0);
+            }
+            to {
+              transform: translate(-32px, -60px);
+            }
+          }
+          .clock-move-up {
+            animation: clockMoveUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes secondClockFadeIn {
+            from {
+              opacity: 0;
+              transform: scale(0.6);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          .second-clock-fade-in {
+            animation: secondClockFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
         `}
       </style>
       <div className="p-4">
@@ -578,17 +666,29 @@ const ElapsedTime = () => {
           {/* Visual Section */}
           <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden">
             <div className="relative w-[400px] h-[260px] bg-white">
-              <div className="absolute left-[8%] top-[20%]">
+              <div className={`absolute left-[8%] top-[20%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
                 {showClock && (
-                  <div className={isClockShrinking ? 'clock-shrink' : 'clock-grow-in'}>
+                  <div className={`${isClockShrinking ? 'clock-shrink' : isClockShrinkingFinal ? 'clock-shrink-final' : 'clock-grow-in'}`}>
                     <Clock 
-                      hours={hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours)} 
-                      minutes={hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes)} 
+                      hours={isClockMovingUp ? startTime.hours : (hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours))} 
+                      minutes={isClockMovingUp ? startTime.minutes : (hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes))} 
                       isMoving={isButtonPressed} 
+                      color={clocksColored ? '#3B82F6' : '#5750E3'}
                     />
                   </div>
                 )}
               </div>
+              {showSecondClock && (
+                <div className="absolute left-[4%] top-[52%] second-clock-fade-in">
+                  <Clock 
+                    hours={endTime.hours} 
+                    minutes={endTime.minutes} 
+                    isMoving={false} 
+                    color={clocksColored ? '#EF4444' : '#5750E3'}
+                    size="small"
+                  />
+                </div>
+              )}
               {showButton && (
                 <div className={`glow-button ${isButtonShrinking ? 'simple-glow stopped' : 'simple-glow'}`}>
                   <button 
@@ -667,7 +767,7 @@ const ElapsedTime = () => {
                   <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className="text-red-500 text-sm font-medium">
-                      {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                      {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
                     </span>
                   </div>
                 </div>
@@ -683,7 +783,7 @@ const ElapsedTime = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className="text-blue-500 text-sm font-medium">
-                      {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
+                      {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
                     </span>
                   </div>
                 </div>
@@ -725,7 +825,7 @@ const ElapsedTime = () => {
             {showCompletionText && (
               <div className="text-sm text-gray-600 fade-in-down text-center">
                 <div>
-                  Now you know how to find <span className="font-bold text-black">elapsed time</span>!
+                  Enter other start and end times to find their <span className="font-bold text-black">elapsed time!</span>
                 </div>
               </div>
             )}
