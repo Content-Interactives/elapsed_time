@@ -149,6 +149,123 @@ const ElapsedTime = () => {
   const [isClockMovingUp, setIsClockMovingUp] = useState(false);
   const [showSecondClock, setShowSecondClock] = useState(false);
   const [clocksColored, setClocksColored] = useState(false);
+  const [startTimeInput, setStartTimeInput] = useState('1230');
+  const [endTimeInput, setEndTimeInput] = useState('1305');
+  const [startHoursInput, setStartHoursInput] = useState('12');
+  const [startMinutesInput, setStartMinutesInput] = useState('30');
+  const [endHoursInput, setEndHoursInput] = useState('13');
+  const [endMinutesInput, setEndMinutesInput] = useState('05');
+  const [isTextFadingOut, setIsTextFadingOut] = useState(false);
+  const [isInputFadingIn, setIsInputFadingIn] = useState(false);
+  const [isStartTimeMovingUp, setIsStartTimeMovingUp] = useState(false);
+  const [isEndTimeMovingUp, setIsEndTimeMovingUp] = useState(false);
+  const [showInputs, setShowInputs] = useState(false);
+  const [startTimeAMPM, setStartTimeAMPM] = useState('AM');
+  const [endTimeAMPM, setEndTimeAMPM] = useState('PM');
+
+  // Function to format time input for display
+  const formatTimeInput = (input) => {
+    if (input.length >= 2) {
+      return input.slice(0, 2) + ':' + input.slice(2);
+    }
+    return input;
+  };
+
+  // Function to parse time input
+  const parseTimeInput = (input) => {
+    const cleanInput = input.replace(':', '');
+    if (cleanInput.length === 4) {
+      const hours = parseInt(cleanInput.slice(0, 2));
+      const minutes = parseInt(cleanInput.slice(2, 4));
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return { hours, minutes };
+      }
+    }
+    return null;
+  };
+
+  // Function to handle time input changes
+  const handleTimeInputChange = (input, setInput, setTime) => {
+    const cleanInput = input.replace(/[^0-9]/g, '');
+    if (cleanInput.length <= 4) {
+      setInput(cleanInput);
+      const parsedTime = parseTimeInput(cleanInput);
+      if (parsedTime) {
+        setTime(parsedTime);
+      }
+    }
+  };
+
+  // Function to handle hour input changes
+  const handleHourInputChange = (value, setHoursInput, setTime, minutesInput, setAMPM) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue.length <= 2) {
+      setHoursInput(cleanValue);
+      const hours = parseInt(cleanValue) || 0;
+      const minutes = parseInt(minutesInput) || 0;
+      if (hours >= 0 && hours <= 23) {
+        setTime({ hours, minutes });
+        
+        // Update AM/PM based on 24-hour time
+        if (hours >= 12) {
+          setAMPM('PM');
+        } else {
+          setAMPM('AM');
+        }
+      }
+    }
+  };
+
+  // Function to handle minute input changes
+  const handleMinuteInputChange = (value, setMinutesInput, setTime, hoursInput) => {
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    if (cleanValue.length <= 2) {
+      setMinutesInput(cleanValue);
+      const hours = parseInt(hoursInput) || 0;
+      const minutes = parseInt(cleanValue) || 0;
+      if (minutes >= 0 && minutes <= 59) {
+        setTime({ hours, minutes });
+      }
+    }
+  };
+
+  // Function to toggle AM/PM and update time
+  const toggleAMPM = (currentAMPM, setAMPM, hoursInput, minutesInput, setTime) => {
+    const newAMPM = currentAMPM === 'AM' ? 'PM' : 'AM';
+    setAMPM(newAMPM);
+    
+    const hours = parseInt(hoursInput) || 0;
+    const minutes = parseInt(minutesInput) || 0;
+    
+    // Convert to 24-hour format
+    let newHours = hours;
+    if (newAMPM === 'PM' && hours !== 12) {
+      newHours = hours + 12;
+    } else if (newAMPM === 'AM' && hours === 12) {
+      newHours = 0;
+    }
+    
+    setTime({ hours: newHours, minutes });
+  };
+
+  // Function to calculate elapsed time
+  const calculateElapsedTime = () => {
+    const startHours = parseInt(startHoursInput) || 0;
+    const startMinutes = parseInt(startMinutesInput) || 0;
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    if (startHours >= 0 && startHours <= 23 && startMinutes >= 0 && startMinutes <= 59 &&
+        endHours >= 0 && endHours <= 23 && endMinutes >= 0 && endMinutes <= 59) {
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
+      const elapsedMinutes = Math.abs(endTotalMinutes - startTotalMinutes);
+      const hours = Math.floor(elapsedMinutes / 60);
+      const minutes = elapsedMinutes % 60;
+      return { hours, minutes };
+    }
+    return { hours: 0, minutes: 35 }; // Default fallback
+  };
 
   const handleClick = () => {
     setIsButtonShrinking(true);
@@ -216,6 +333,17 @@ const ElapsedTime = () => {
           setShowSecondClock(true);
           setTimeout(() => {
             setClocksColored(true);
+            // Trigger input animation first
+            setIsInputFadingIn(true);
+            // Trigger container movement animations
+            setIsStartTimeMovingUp(true);
+            setIsEndTimeMovingUp(true);
+            // Set inputs as shown
+            setShowInputs(true);
+            setTimeout(() => {
+              // Then trigger text fade out
+              setIsTextFadingOut(true);
+            }, 400);
           }, 200);
           setTimeout(() => {
             setShowFinalText(false);
@@ -330,6 +458,19 @@ const ElapsedTime = () => {
     setIsClockMovingUp(false);
     setShowSecondClock(false);
     setClocksColored(false);
+    setStartTimeInput('1230');
+    setEndTimeInput('1305');
+    setStartHoursInput('12');
+    setStartMinutesInput('30');
+    setEndHoursInput('13');
+    setEndMinutesInput('05');
+    setIsTextFadingOut(false);
+    setIsInputFadingIn(false);
+    setIsStartTimeMovingUp(false);
+    setIsEndTimeMovingUp(false);
+    setShowInputs(false);
+    setStartTimeAMPM('AM');
+    setEndTimeAMPM('PM');
   };
 
   return (
@@ -583,7 +724,7 @@ const ElapsedTime = () => {
               transform: translateX(0);
             }
             to {
-              transform: translateX(5px);
+              transform: translateX(7px);
             }
           }
           .shift-right {
@@ -647,6 +788,57 @@ const ElapsedTime = () => {
           }
           .second-clock-fade-in {
             animation: secondClockFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes fadeInInput {
+            from {
+              opacity: 0;
+              transform: scale(0.8);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          .fade-in-input {
+            animation: fadeInInput 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes fadeOutText {
+            from {
+              opacity: 1;
+              transform: scale(1);
+            }
+            to {
+              opacity: 0;
+              transform: scale(0.8);
+            }
+          }
+          .fade-out-text {
+            animation: fadeOutText 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          .input-transition {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+          @keyframes moveStartTimeUp {
+            0% {
+              transform: translateY(-50px);
+            }
+            100% {
+              transform: translateY(-65px);
+            }
+          }
+          .move-start-time-up {
+            animation: moveStartTimeUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveEndTimeUp {
+            0% {
+              transform: translateY(-50px);
+            }
+            100% {
+              transform: translateY(-55px);
+            }
+          }
+          .move-end-time-up {
+            animation: moveEndTimeUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
         `}
       </style>
@@ -734,22 +926,90 @@ const ElapsedTime = () => {
                 </div>
               )}
               {showEndTime && showFirstTimes && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''} ${isEndTimeMovingUp ? 'move-end-time-up' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
-                    <span className="text-red-500 text-sm font-medium">
-                      {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
-                    </span>
+                    {clocksColored ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={endHoursInput}
+                          onChange={(e) => handleHourInputChange(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
+                          className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="HH"
+                        />
+                        <span className={`text-red-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                        <input
+                          type="text"
+                          value={endMinutesInput}
+                          onChange={(e) => handleMinuteInputChange(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
+                          className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="MM"
+                        />
+                        <button
+                          onClick={() => toggleAMPM(endTimeAMPM, setEndTimeAMPM, endHoursInput, endMinutesInput, setEndTime)}
+                          className={`text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                        >
+                          {endTimeAMPM}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                        {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
               {showStartTime && showFirstTimes && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'text-shrink' : ''} ${isStartTimeMovingUp ? 'move-start-time-up' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
-                    <span className="text-blue-500 text-sm font-medium">
-                      {`${startTime.hours % 12 || 12}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
-                    </span>
+                    {clocksColored ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={startHoursInput}
+                          onChange={(e) => handleHourInputChange(e.target.value, setStartHoursInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startMinutesInput, setStartTimeAMPM)}
+                          className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="HH"
+                        />
+                        <span className={`text-blue-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                        <input
+                          type="text"
+                          value={startMinutesInput}
+                          onChange={(e) => handleMinuteInputChange(e.target.value, setStartMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startHoursInput)}
+                          className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="MM"
+                        />
+                        <button
+                          onClick={() => toggleAMPM(startTimeAMPM, setStartTimeAMPM, startHoursInput, startMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          })}
+                          className={`text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                        >
+                          {startTimeAMPM}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                        {`${startTime.hours % 12 || 12}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
@@ -763,34 +1023,102 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isEndTimeMovingUp ? 'move-end-time-up' : ''}`}>
                   <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
-                    <span className="text-red-500 text-sm font-medium">
-                      {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
-                    </span>
+                    {clocksColored ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={endHoursInput}
+                          onChange={(e) => handleHourInputChange(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
+                          className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="HH"
+                        />
+                        <span className={`text-red-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                        <input
+                          type="text"
+                          value={endMinutesInput}
+                          onChange={(e) => handleMinuteInputChange(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
+                          className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="MM"
+                        />
+                        <button
+                          onClick={() => toggleAMPM(endTimeAMPM, setEndTimeAMPM, endHoursInput, endMinutesInput, setEndTime)}
+                          className={`text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                        >
+                          {endTimeAMPM}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                        {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
               {showUnderline && (
                 <>
-                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] w-[135px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
+                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '160px' : '135px' }} />
                   <div className={`absolute left-[185px] top-[128px] w-[8px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
                 </>
               )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isStartTimeMovingUp ? 'move-start-time-up' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
-                    <span className="text-blue-500 text-sm font-medium">
-                      {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
-                    </span>
+                    {clocksColored ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={startHoursInput}
+                          onChange={(e) => handleHourInputChange(e.target.value, setStartHoursInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startMinutesInput, setStartTimeAMPM)}
+                          className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="HH"
+                        />
+                        <span className={`text-blue-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                        <input
+                          type="text"
+                          value={startMinutesInput}
+                          onChange={(e) => handleMinuteInputChange(e.target.value, setStartMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startHoursInput)}
+                          className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                          maxLength={2}
+                          placeholder="MM"
+                        />
+                        <button
+                          onClick={() => toggleAMPM(startTimeAMPM, setStartTimeAMPM, startHoursInput, startMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          })}
+                          className={`text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                        >
+                          {startTimeAMPM}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                        {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
               {showElapsedTime && (
                 <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
-                  Elapsed Time: 0h 35m
+                  Elapsed Time: {calculateElapsedTime().hours}h {calculateElapsedTime().minutes}m
                 </div>
               )}
             </div>
