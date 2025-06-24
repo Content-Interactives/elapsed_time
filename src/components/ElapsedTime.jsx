@@ -13,8 +13,6 @@ const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'no
     normal: {
       outer: 'w-[140px] h-[140px]',
       inner: 'w-[120px] h-[120px]',
-      button: 'w-6 h-2',
-      stem: 'w-1 h-2',
       border: 'border-4',
       numbers: 'text-sm',
       hourHand: 'w-[1.5px] h-10',
@@ -25,8 +23,6 @@ const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'no
     small: {
       outer: 'w-[105px] h-[105px]',
       inner: 'w-[90px] h-[90px]',
-      button: 'w-5 h-1.5',
-      stem: 'w-1 h-1.5',
       border: 'border-2',
       borderWidth: '3px',
       numbers: 'text-xs',
@@ -41,11 +37,6 @@ const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'no
 
   return (
     <div className="flex flex-col items-center">
-      {/* Stopwatch stem and button */}
-      <div className="relative mb-0">
-        <div className={`${config.button} rounded-full ${isMoving ? 'button-press-animation' : ''}`} style={{ backgroundColor: color, transition: 'background-color 0.1s ease-in-out 0.2s' }} /> {/* Button */}
-        <div className={`${config.stem} mx-auto`} style={{ backgroundColor: color, transition: 'background-color 0.1s ease-in-out 0.2s' }} /> {/* Stem */}
-      </div>
       <div className={`${config.outer} bg-white rounded-full ${config.border} flex items-center justify-center relative`} style={{ 
         borderColor: color, 
         borderWidth: config.borderWidth || '4px',
@@ -162,6 +153,10 @@ const ElapsedTime = () => {
   const [showInputs, setShowInputs] = useState(false);
   const [startTimeAMPM, setStartTimeAMPM] = useState('AM');
   const [endTimeAMPM, setEndTimeAMPM] = useState('PM');
+  const [isStartTimeMovingLeft, setIsStartTimeMovingLeft] = useState(false);
+  const [isEndTimeMovingLeft, setIsEndTimeMovingLeft] = useState(false);
+  const [isUnderlineMovingLeft, setIsUnderlineMovingLeft] = useState(false);
+  const [isElapsedTimeMovingLeft, setIsElapsedTimeMovingLeft] = useState(false);
 
   // Function to format time input for display
   const formatTimeInput = (input) => {
@@ -200,10 +195,20 @@ const ElapsedTime = () => {
   const handleHourInputChange = (value, setHoursInput, setTime, minutesInput, setAMPM) => {
     const cleanValue = value.replace(/[^0-9]/g, '');
     if (cleanValue.length <= 2) {
-      setHoursInput(cleanValue);
-      const hours = parseInt(cleanValue) || 0;
+      let hours = parseInt(cleanValue) || 0;
       const minutes = parseInt(minutesInput) || 0;
-      if (hours >= 0 && hours <= 23) {
+      
+      // Auto-correct maximum immediately while typing
+      if (hours > 12) {
+        hours = 12;
+        const correctedValue = hours.toString();
+        setHoursInput(correctedValue);
+      } else {
+        setHoursInput(cleanValue);
+      }
+      
+      // Only update clock if input is valid (not empty and within range)
+      if (hours >= 1 && hours <= 12) {
         setTime({ hours, minutes });
         
         // Update AM/PM based on 24-hour time
@@ -216,17 +221,62 @@ const ElapsedTime = () => {
     }
   };
 
+  // Function to handle hour input blur (when user deselects)
+  const handleHourInputBlur = (value, setHoursInput, setTime, minutesInput, setAMPM) => {
+    let hours = parseInt(value) || 0;
+    const minutes = parseInt(minutesInput) || 0;
+    
+    // Auto-correct to minimum if empty or below minimum
+    if (hours < 1) hours = 1;
+    if (hours > 12) hours = 12;
+    
+    const correctedValue = hours.toString();
+    setHoursInput(correctedValue);
+    setTime({ hours, minutes });
+    
+    // Update AM/PM based on 24-hour time
+    if (hours >= 12) {
+      setAMPM('PM');
+    } else {
+      setAMPM('AM');
+    }
+  };
+
   // Function to handle minute input changes
   const handleMinuteInputChange = (value, setMinutesInput, setTime, hoursInput) => {
     const cleanValue = value.replace(/[^0-9]/g, '');
     if (cleanValue.length <= 2) {
-      setMinutesInput(cleanValue);
+      let minutes = parseInt(cleanValue) || 0;
       const hours = parseInt(hoursInput) || 0;
-      const minutes = parseInt(cleanValue) || 0;
-      if (minutes >= 0 && minutes <= 59) {
+      
+      // Auto-correct maximum immediately while typing
+      if (minutes > 59) {
+        minutes = 59;
+        const correctedValue = minutes.toString().padStart(2, '0');
+        setMinutesInput(correctedValue);
+      } else {
+        setMinutesInput(cleanValue);
+      }
+      
+      // Only update clock if input is valid (not empty and within range)
+      if (minutes >= 0 && minutes <= 59 && hours >= 1 && hours <= 12) {
         setTime({ hours, minutes });
       }
     }
+  };
+
+  // Function to handle minute input blur (when user deselects)
+  const handleMinuteInputBlur = (value, setMinutesInput, setTime, hoursInput) => {
+    let minutes = parseInt(value) || 0;
+    const hours = parseInt(hoursInput) || 0;
+    
+    // Auto-correct to minimum if empty or below minimum
+    if (minutes < 0) minutes = 0;
+    if (minutes > 59) minutes = 59;
+    
+    const correctedValue = minutes.toString().padStart(2, '0');
+    setMinutesInput(correctedValue);
+    setTime({ hours, minutes });
   };
 
   // Function to toggle AM/PM and update time
@@ -237,7 +287,7 @@ const ElapsedTime = () => {
     const hours = parseInt(hoursInput) || 0;
     const minutes = parseInt(minutesInput) || 0;
     
-    // Convert to 24-hour format
+    // Convert to 24-hour format for calculation
     let newHours = hours;
     if (newAMPM === 'PM' && hours !== 12) {
       newHours = hours + 12;
@@ -255,10 +305,26 @@ const ElapsedTime = () => {
     const endHours = parseInt(endHoursInput) || 0;
     const endMinutes = parseInt(endMinutesInput) || 0;
     
-    if (startHours >= 0 && startHours <= 23 && startMinutes >= 0 && startMinutes <= 59 &&
-        endHours >= 0 && endHours <= 23 && endMinutes >= 0 && endMinutes <= 59) {
-      const startTotalMinutes = startHours * 60 + startMinutes;
-      const endTotalMinutes = endHours * 60 + endMinutes;
+    if (startHours >= 1 && startHours <= 12 && startMinutes >= 0 && startMinutes <= 59 &&
+        endHours >= 1 && endHours <= 12 && endMinutes >= 0 && endMinutes <= 59) {
+      
+      // Convert 12-hour format to 24-hour format for calculation
+      let start24Hours = startHours;
+      if (startTimeAMPM === 'PM' && startHours !== 12) {
+        start24Hours = startHours + 12;
+      } else if (startTimeAMPM === 'AM' && startHours === 12) {
+        start24Hours = 0;
+      }
+      
+      let end24Hours = endHours;
+      if (endTimeAMPM === 'PM' && endHours !== 12) {
+        end24Hours = endHours + 12;
+      } else if (endTimeAMPM === 'AM' && endHours === 12) {
+        end24Hours = 0;
+      }
+      
+      const startTotalMinutes = start24Hours * 60 + startMinutes;
+      const endTotalMinutes = end24Hours * 60 + endMinutes;
       const elapsedMinutes = Math.abs(endTotalMinutes - startTotalMinutes);
       const hours = Math.floor(elapsedMinutes / 60);
       const minutes = elapsedMinutes % 60;
@@ -340,18 +406,18 @@ const ElapsedTime = () => {
             setIsEndTimeMovingUp(true);
             // Set inputs as shown
             setShowInputs(true);
+            // Add delay for left movement animations
+            setTimeout(() => {
+              setIsStartTimeMovingLeft(true);
+              setIsEndTimeMovingLeft(true);
+              setIsUnderlineMovingLeft(true);
+              setIsElapsedTimeMovingLeft(true);
+            }, 200);
             setTimeout(() => {
               // Then trigger text fade out
               setIsTextFadingOut(true);
             }, 400);
           }, 200);
-          setTimeout(() => {
-            setShowFinalText(false);
-            setShowFinalContinue(false);
-            setTimeout(() => {
-              setShowCompletionText(true);
-            }, 500);
-          }, 800);
         }, 500);
       }, 500);
     } else {
@@ -471,6 +537,10 @@ const ElapsedTime = () => {
     setShowInputs(false);
     setStartTimeAMPM('AM');
     setEndTimeAMPM('PM');
+    setIsStartTimeMovingLeft(false);
+    setIsEndTimeMovingLeft(false);
+    setIsUnderlineMovingLeft(false);
+    setIsElapsedTimeMovingLeft(false);
   };
 
   return (
@@ -840,6 +910,50 @@ const ElapsedTime = () => {
           .move-end-time-up {
             animation: moveEndTimeUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
+          @keyframes moveStartTimeLeft {
+            0% {
+              transform: translateY(-65px);
+            }
+            100% {
+              transform: translate(-50px, -65px);
+            }
+          }
+          .move-start-time-left {
+            animation: moveStartTimeLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveEndTimeLeft {
+            0% {
+              transform: translateY(-55px);
+            }
+            100% {
+              transform: translate(-50px, -55px);
+            }
+          }
+          .move-end-time-left {
+            animation: moveEndTimeLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveUnderlineLeft {
+            0% {
+              transform: scaleX(1);
+            }
+            100% {
+              transform: translateX(-50px) scaleX(1);
+            }
+          }
+          .move-underline-left {
+            animation: moveUnderlineLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveElapsedTimeLeft {
+            0% {
+              transform: translate(1px, 0px);
+            }
+            100% {
+              transform: translate(-49px, 0px);
+            }
+          }
+          .move-elapsed-time-left {
+            animation: moveElapsedTimeLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
         `}
       </style>
       <div className="p-4">
@@ -858,7 +972,7 @@ const ElapsedTime = () => {
           {/* Visual Section */}
           <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden">
             <div className="relative w-[400px] h-[260px] bg-white">
-              <div className={`absolute left-[8%] top-[20%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
+              <div className={`absolute left-[8%] top-[25%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
                 {showClock && (
                   <div className={`${isClockShrinking ? 'clock-shrink' : isClockShrinkingFinal ? 'clock-shrink-final' : 'clock-grow-in'}`}>
                     <Clock 
@@ -935,6 +1049,7 @@ const ElapsedTime = () => {
                           type="text"
                           value={endHoursInput}
                           onChange={(e) => handleHourInputChange(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
+                          onBlur={(e) => handleHourInputBlur(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
                           className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                           maxLength={2}
                           placeholder="HH"
@@ -944,6 +1059,7 @@ const ElapsedTime = () => {
                           type="text"
                           value={endMinutesInput}
                           onChange={(e) => handleMinuteInputChange(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
+                          onBlur={(e) => handleMinuteInputBlur(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
                           className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                           maxLength={2}
                           placeholder="MM"
@@ -958,6 +1074,11 @@ const ElapsedTime = () => {
                     ) : (
                       <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
                         {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                      </span>
+                    )}
+                    {!clocksColored && showSecondExplanation && (
+                      <span className={`text-black font-bold text-xs -ml-0.5 grow-in ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                        +12 hours
                       </span>
                     )}
                   </div>
@@ -977,6 +1098,11 @@ const ElapsedTime = () => {
                             startTime.hours = newTime.hours;
                             startTime.minutes = newTime.minutes;
                           }, startMinutesInput, setStartTimeAMPM)}
+                          onBlur={(e) => handleHourInputBlur(e.target.value, setStartHoursInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startMinutesInput, setStartTimeAMPM)}
                           className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                           maxLength={2}
                           placeholder="HH"
@@ -986,6 +1112,11 @@ const ElapsedTime = () => {
                           type="text"
                           value={startMinutesInput}
                           onChange={(e) => handleMinuteInputChange(e.target.value, setStartMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startHoursInput)}
+                          onBlur={(e) => handleMinuteInputBlur(e.target.value, setStartMinutesInput, (newTime) => {
                             // Update the static startTime reference
                             startTime.hours = newTime.hours;
                             startTime.minutes = newTime.minutes;
@@ -1023,7 +1154,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isEndTimeMovingUp ? 'move-end-time-up' : ''}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isEndTimeMovingLeft ? 'move-end-time-left' : isEndTimeMovingUp ? 'move-end-time-up' : ''}`}>
                   <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     {clocksColored ? (
@@ -1032,6 +1163,7 @@ const ElapsedTime = () => {
                           type="text"
                           value={endHoursInput}
                           onChange={(e) => handleHourInputChange(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
+                          onBlur={(e) => handleHourInputBlur(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
                           className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                           maxLength={2}
                           placeholder="HH"
@@ -1041,6 +1173,7 @@ const ElapsedTime = () => {
                           type="text"
                           value={endMinutesInput}
                           onChange={(e) => handleMinuteInputChange(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
+                          onBlur={(e) => handleMinuteInputBlur(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
                           className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                           maxLength={2}
                           placeholder="MM"
@@ -1062,12 +1195,12 @@ const ElapsedTime = () => {
               )}
               {showUnderline && (
                 <>
-                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '160px' : '135px' }} />
-                  <div className={`absolute left-[185px] top-[128px] w-[8px] h-[2px] bg-[#5750E3] ${hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
+                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '200px' : '135px' }} />
+                  <div className={`absolute left-[185px] top-[128px] w-[8px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
                 </>
               )}
               {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isStartTimeMovingUp ? 'move-start-time-up' : ''}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${is24HourTimesRising ? 'move-to-top' : 'text-animation'} ${isStartTimeMovingLeft ? 'move-start-time-left' : isStartTimeMovingUp ? 'move-start-time-up' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     {clocksColored ? (
@@ -1076,6 +1209,11 @@ const ElapsedTime = () => {
                           type="text"
                           value={startHoursInput}
                           onChange={(e) => handleHourInputChange(e.target.value, setStartHoursInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startMinutesInput, setStartTimeAMPM)}
+                          onBlur={(e) => handleHourInputBlur(e.target.value, setStartHoursInput, (newTime) => {
                             // Update the static startTime reference
                             startTime.hours = newTime.hours;
                             startTime.minutes = newTime.minutes;
@@ -1089,6 +1227,11 @@ const ElapsedTime = () => {
                           type="text"
                           value={startMinutesInput}
                           onChange={(e) => handleMinuteInputChange(e.target.value, setStartMinutesInput, (newTime) => {
+                            // Update the static startTime reference
+                            startTime.hours = newTime.hours;
+                            startTime.minutes = newTime.minutes;
+                          }, startHoursInput)}
+                          onBlur={(e) => handleMinuteInputBlur(e.target.value, setStartMinutesInput, (newTime) => {
                             // Update the static startTime reference
                             startTime.hours = newTime.hours;
                             startTime.minutes = newTime.minutes;
@@ -1117,7 +1260,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {showElapsedTime && (
-                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
+                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
                   Elapsed Time: {calculateElapsedTime().hours}h {calculateElapsedTime().minutes}m
                 </div>
               )}
@@ -1137,7 +1280,7 @@ const ElapsedTime = () => {
             {showExplanation && (
               <div className={`text-sm text-gray-600 ${isSecondTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
-                  We can subtract the <span className="text-blue-500">start time</span> from the <span className="text-red-500">end time</span> to find the <span className="font-bold text-black">elapsed time</span>, but first we need to convert both times into a 24 hour format.  
+                  To find <span className="font-bold text-black">elapsed time</span>, first convert both times into a 24 hour format by adding 12 hours to all pm times past 12pm.  
                 </div>
               </div>
             )}
@@ -1145,7 +1288,7 @@ const ElapsedTime = () => {
             {showFinalText && (
               <div className={`text-sm text-gray-600 ${isFinalTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
-                  After subtracting, we make sure to take the absolute value of the result since there can be no negative time.
+                  Now we can subtract the start and end times, and taking the absolute value as the <span className="font-bold text-black">elapsed time</span>.
                 </div>
               </div>
             )}
