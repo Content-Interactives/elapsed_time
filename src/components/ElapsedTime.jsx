@@ -166,6 +166,12 @@ const ElapsedTime = () => {
   const [showEndTimeText, setShowEndTimeText] = useState(false);
   const [showStartTimePlus12, setShowStartTimePlus12] = useState(false);
   const [showEndTimePlus12, setShowEndTimePlus12] = useState(false);
+  const [showStartTime24Hour, setShowStartTime24Hour] = useState(false);
+  const [showEndTime24Hour, setShowEndTime24Hour] = useState(false);
+  const [isStartTimeAnimating, setIsStartTimeAnimating] = useState(false);
+  const [isEndTimeAnimating, setIsEndTimeAnimating] = useState(false);
+  const [startTimeAnimationStep, setStartTimeAnimationStep] = useState(0);
+  const [endTimeAnimationStep, setEndTimeAnimationStep] = useState(0);
 
   // Function to format time input for display
   const formatTimeInput = (input) => {
@@ -310,7 +316,8 @@ const ElapsedTime = () => {
   };
 
   const handleSolve = () => {
-    setIsInputsDirty(false);
+    // Keep isInputsDirty as true to not show the elapsed time answer
+    // setIsInputsDirty(false);
     setShowSolveButton(false);
     setIsInputsAnimatingToText(true);
     
@@ -329,6 +336,38 @@ const ElapsedTime = () => {
       setShowEndTimeText(true);
       setTimeout(() => {
         setShowStartTimeText(true);
+        
+        // After the time text appears, show 24-hour format times with delay
+        setTimeout(() => {
+          if (startTimeAMPM === 'PM' && startHours !== 12) {
+            setIsStartTimeAnimating(true);
+            // Start gradual animation for start time
+            let step = 0;
+            const startInterval = setInterval(() => {
+              step++;
+              setStartTimeAnimationStep(step);
+              if (step >= 12) {
+                clearInterval(startInterval);
+                setIsStartTimeAnimating(false);
+                setShowStartTime24Hour(true);
+              }
+            }, 100); // 100ms between each increment
+          }
+          if (endTimeAMPM === 'PM' && endHours !== 12) {
+            setIsEndTimeAnimating(true);
+            // Start gradual animation for end time
+            let step = 0;
+            const endInterval = setInterval(() => {
+              step++;
+              setEndTimeAnimationStep(step);
+              if (step >= 12) {
+                clearInterval(endInterval);
+                setIsEndTimeAnimating(false);
+                setShowEndTime24Hour(true);
+              }
+            }, 100); // 100ms between each increment
+          }
+        }, 800);
       }, 300);
     }, 200);
   };
@@ -366,6 +405,78 @@ const ElapsedTime = () => {
       return { hours, minutes };
     }
     return { hours: 0, minutes: 35 }; // Default fallback
+  };
+
+  // Helper function to get 24-hour format time for start time
+  const getStartTime24Hour = () => {
+    const startHours = parseInt(startHoursInput) || 0;
+    const startMinutes = parseInt(startMinutesInput) || 0;
+    
+    let start24Hours = startHours;
+    if (startTimeAMPM === 'PM' && startHours !== 12) {
+      start24Hours = startHours + 12;
+    } else if (startTimeAMPM === 'AM' && startHours === 12) {
+      start24Hours = 0;
+    }
+    
+    return `${start24Hours}:${String(startMinutes).padStart(2, '0')}`;
+  };
+
+  // Helper function to get animated 24-hour format time for start time
+  const getStartTimeAnimated = () => {
+    const startHours = parseInt(startHoursInput) || 0;
+    const startMinutes = parseInt(startMinutesInput) || 0;
+    
+    let animatedHours = startHours;
+    if (startTimeAMPM === 'PM' && startHours !== 12) {
+      // Add animation steps (0 to 12)
+      animatedHours = startHours + startTimeAnimationStep;
+    } else if (startTimeAMPM === 'AM' && startHours === 12) {
+      animatedHours = startTimeAnimationStep;
+    }
+    
+    // During animation, show AM/PM. After animation (step 12), show 24-hour format without AM/PM
+    if (startTimeAnimationStep < 12) {
+      return `${animatedHours}:${String(startMinutes).padStart(2, '0')} ${startTimeAMPM}`;
+    } else {
+      return `${animatedHours}:${String(startMinutes).padStart(2, '0')}`;
+    }
+  };
+
+  // Helper function to get 24-hour format time for end time
+  const getEndTime24Hour = () => {
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    let end24Hours = endHours;
+    if (endTimeAMPM === 'PM' && endHours !== 12) {
+      end24Hours = endHours + 12;
+    } else if (endTimeAMPM === 'AM' && endHours === 12) {
+      end24Hours = 0;
+    }
+    
+    return `${end24Hours}:${String(endMinutes).padStart(2, '0')}`;
+  };
+
+  // Helper function to get animated 24-hour format time for end time
+  const getEndTimeAnimated = () => {
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    let animatedHours = endHours;
+    if (endTimeAMPM === 'PM' && endHours !== 12) {
+      // Add animation steps (0 to 12)
+      animatedHours = endHours + endTimeAnimationStep;
+    } else if (endTimeAMPM === 'AM' && endHours === 12) {
+      animatedHours = endTimeAnimationStep;
+    }
+    
+    // During animation, show AM/PM. After animation (step 12), show 24-hour format without AM/PM
+    if (endTimeAnimationStep < 12) {
+      return `${animatedHours}:${String(endMinutes).padStart(2, '0')} ${endTimeAMPM}`;
+    } else {
+      return `${animatedHours}:${String(endMinutes).padStart(2, '0')}`;
+    }
   };
 
   const handleClick = () => {
@@ -450,7 +561,7 @@ const ElapsedTime = () => {
               setIsEndTimeMovingLeft(true);
               setIsUnderlineMovingLeft(true);
               setIsElapsedTimeMovingLeft(true);
-            }, 200);
+            }, 400);
             setTimeout(() => {
               // Then trigger text fade out
               setIsTextFadingOut(true);
@@ -462,7 +573,7 @@ const ElapsedTime = () => {
                 setShowCompletionText(true);
               }, 500);
             }, 800);
-          }, 200);
+          }, 400);
         }, 500);
       }, 500);
     } else {
@@ -482,9 +593,9 @@ const ElapsedTime = () => {
               setTimeout(() => {
                 setShowSecondContinue(true);
               }, 1200);
-            }, 500);
-          }, 500);
-        }, 500);
+            }, 800);
+          }, 800);
+        }, 800);
       }, 300);
     }
   };
@@ -594,6 +705,12 @@ const ElapsedTime = () => {
     setShowEndTimeText(false);
     setShowStartTimePlus12(false);
     setShowEndTimePlus12(false);
+    setShowStartTime24Hour(false);
+    setShowEndTime24Hour(false);
+    setIsStartTimeAnimating(false);
+    setIsEndTimeAnimating(false);
+    setStartTimeAnimationStep(0);
+    setEndTimeAnimationStep(0);
   };
 
   return (
@@ -1190,7 +1307,7 @@ const ElapsedTime = () => {
                             </button>
                             {showEndTimeText && (
                               <span className="text-red-500 text-sm font-medium fade-in-down">
-                                {`${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
+                                {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
                               </span>
                             )}
                             {showEndTimePlus12 && (
@@ -1201,7 +1318,7 @@ const ElapsedTime = () => {
                           </>
                         ) : (
                           <span className={`text-red-500 text-sm font-medium ${showEndTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {`${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
+                            {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
                           </span>
                         )}
                       </div>
@@ -1293,8 +1410,8 @@ const ElapsedTime = () => {
                               {startTimeAMPM}
                             </button>
                             {showStartTimeText && (
-                              <span className="text-blue-500 text-sm font-medium fade-in-down">
-                                {`${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
+                              <span className={`text-blue-500 text-sm font-medium ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
+                                {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
                               </span>
                             )}
                             {showStartTimePlus12 && (
@@ -1378,7 +1495,7 @@ const ElapsedTime = () => {
                           </>
                         ) : (
                           <span className={`text-blue-500 text-sm font-medium ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {`${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
+                            {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
                           </span>
                         )}
                         {showStartTimePlus12 && (
@@ -1431,7 +1548,7 @@ const ElapsedTime = () => {
                           </>
                         ) : (
                           <span className={`text-red-500 text-sm font-medium ${showEndTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {`${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
+                            {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
                           </span>
                         )}
                         {showEndTimePlus12 && (
