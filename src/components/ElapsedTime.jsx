@@ -172,6 +172,7 @@ const ElapsedTime = () => {
   const [isEndTimeAnimating, setIsEndTimeAnimating] = useState(false);
   const [startTimeAnimationStep, setStartTimeAnimationStep] = useState(0);
   const [endTimeAnimationStep, setEndTimeAnimationStep] = useState(0);
+  const [isInputsMovingLeft, setIsInputsMovingLeft] = useState(false);
 
   // Function to format time input for display
   const formatTimeInput = (input) => {
@@ -534,10 +535,10 @@ const ElapsedTime = () => {
                   setShowFinalContinue(true);
                 }, 1000);
               }, 1000);
-            }, 500);
-          }, 300);
-        }, 300);
-      }, 500);
+            }, 800);
+          }, 800);
+        }, 800);
+      }, 800);
     } else if (showFinalContinue) {
       setIsFinalTextShrinking(true);
       setIsFinalButtonShrinking(true);
@@ -550,18 +551,12 @@ const ElapsedTime = () => {
             setClocksColored(true);
             // Trigger input animation first
             setIsInputFadingIn(true);
-            // Trigger container movement animations
-            setIsStartTimeMovingUp(true);
-            setIsEndTimeMovingUp(true);
+            // Trigger left movement animations for equation elements
+            setIsUnderlineMovingLeft(true);
+            setIsElapsedTimeMovingLeft(true);
+            setIsInputsMovingLeft(true);
             // Set inputs as shown
             setShowInputs(true);
-            // Add delay for left movement animations
-            setTimeout(() => {
-              setIsStartTimeMovingLeft(true);
-              setIsEndTimeMovingLeft(true);
-              setIsUnderlineMovingLeft(true);
-              setIsElapsedTimeMovingLeft(true);
-            }, 400);
             setTimeout(() => {
               // Then trigger text fade out
               setIsTextFadingOut(true);
@@ -711,6 +706,7 @@ const ElapsedTime = () => {
     setIsEndTimeAnimating(false);
     setStartTimeAnimationStep(0);
     setEndTimeAnimationStep(0);
+    setIsInputsMovingLeft(false);
   };
 
   return (
@@ -1117,10 +1113,10 @@ const ElapsedTime = () => {
           }
           @keyframes moveStartTimeLeft {
             0% {
-              transform: translateY(-30px);
+              transform: translateY(-25px);
             }
             100% {
-              transform: translate(-50px, -30px);
+              transform: translate(-50px, -25px);
             }
           }
           .move-start-time-left {
@@ -1193,6 +1189,16 @@ const ElapsedTime = () => {
           }
           .fade-out-input {
             animation: fadeOutInput 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveInputsLeft {
+            0% {
+            }
+            100% {
+              transform: translateX(-195px);
+            }
+          }
+          .move-inputs-left {
+            animation: moveInputsLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
         `}
       </style>
@@ -1279,55 +1285,15 @@ const ElapsedTime = () => {
                   </button>
                 </div>
               )}
-              {showEndTime && showFirstTimes && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''} ${isEndTimeMovingUp ? 'move-end-time-up' : ''}`}>
+              {/* Phase 1: Initial demo times (12:30 PM and 1:05 PM) */}
+              {showEndTime && showFirstTimes && !clocksColored && (
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
-                    {clocksColored ? (
-                      <div className="flex items-center gap-1">
-                        {!isInputsAnimatingToText ? (
-                          <>
-                            <input
-                              type="text"
-                              value={endHoursInput}
-                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
-                              maxLength={2}
-                              readOnly
-                            />
-                            <span className="text-red-500 text-sm font-medium fade-out-input">:</span>
-                            <input
-                              type="text"
-                              value={endMinutesInput}
-                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
-                              maxLength={2}
-                              readOnly
-                            />
-                            <button className="text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input">
-                              {endTimeAMPM}
-                            </button>
-                            {showEndTimeText && (
-                              <span className="text-red-500 text-sm font-medium fade-in-down">
-                                {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
-                              </span>
-                            )}
-                            {showEndTimePlus12 && (
-                              <span className="text-black font-bold text-xs ml-1 fade-in-down">
-                                +12 hours
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          <span className={`text-red-500 text-sm font-medium ${showEndTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
-                        {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
-                      </span>
-                    )}
-                    {!clocksColored && showSecondExplanation && (
+                    <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                      {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
+                    {showSecondExplanation && (
                       <span className={`text-black font-bold text-xs -ml-0.5 grow-in ${isTextFadingOut ? 'shrink-out-vertical' : ''}`}>
                         +12 hours
                       </span>
@@ -1335,101 +1301,40 @@ const ElapsedTime = () => {
                   </div>
                 </div>
               )}
-              {showStartTime && showFirstTimes && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''} ${isStartTimeMovingUp ? 'move-start-time-up' : ''}`}>
+              {showStartTime && showFirstTimes && !clocksColored && (
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
-                    {clocksColored ? (
-                      <div className="flex items-center gap-1">
-                        {!isInputsAnimatingToText ? (
-                          <>
-                            <input
-                              type="text"
-                              value={startHoursInput}
-                              onChange={(e) => handleHourInputChange(e.target.value, setStartHoursInput, (newTime) => {
-                                // Update the static startTime reference
-                                startTime.hours = newTime.hours;
-                                startTime.minutes = newTime.minutes;
-                              }, startMinutesInput, setStartTimeAMPM)}
-                              onBlur={(e) => handleHourInputBlur(e.target.value, setStartHoursInput, (newTime) => {
-                                // Update the static startTime reference
-                                startTime.hours = newTime.hours;
-                                startTime.minutes = newTime.minutes;
-                              }, startMinutesInput, setStartTimeAMPM)}
-                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
-                              maxLength={2}
-                              placeholder="HH"
-                            />
-                            <span className={`text-blue-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
-                            <input
-                              type="text"
-                              value={startMinutesInput}
-                              onChange={(e) => handleMinuteInputChange(e.target.value, setStartMinutesInput, (newTime) => {
-                                // Update the static startTime reference
-                                startTime.hours = newTime.hours;
-                                startTime.minutes = newTime.minutes;
-                              }, startHoursInput)}
-                              onBlur={(e) => handleMinuteInputBlur(e.target.value, setStartMinutesInput, (newTime) => {
-                                // Update the static startTime reference
-                                startTime.hours = newTime.hours;
-                                startTime.minutes = newTime.minutes;
-                              }, startHoursInput)}
-                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
-                              maxLength={2}
-                              placeholder="MM"
-                            />
-                            <button
-                              onClick={() => toggleAMPM(startTimeAMPM, setStartTimeAMPM, startHoursInput, startMinutesInput, (newTime) => {
-                                // Update the static startTime reference
-                                startTime.hours = newTime.hours;
-                                startTime.minutes = newTime.minutes;
-                              })}
-                              className={`text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
-                            >
-                              {startTimeAMPM}
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <input
-                              type="text"
-                              value={startHoursInput}
-                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
-                              maxLength={2}
-                              readOnly
-                            />
-                            <span className="text-blue-500 text-sm font-medium fade-out-input">:</span>
-                            <input
-                              type="text"
-                              value={startMinutesInput}
-                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
-                              maxLength={2}
-                              readOnly
-                            />
-                            <button className="text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input">
-                              {startTimeAMPM}
-                            </button>
-                            {showStartTimeText && (
-                              <span className={`text-blue-500 text-sm font-medium ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                                {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
-                              </span>
-                            )}
-                            {showStartTimePlus12 && (
-                              <span className="text-black font-bold text-xs ml-1 fade-in-down">
-                                +12 hours
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    ) : (
-                      <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
-                        {`${startTime.hours % 12 || 12}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
-                      </span>
-                    )}
+                    <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                      {`${startTime.hours % 12 || 12}:${String(startTime.minutes).padStart(2, '0')} ${startTime.hours >= 12 ? 'PM' : 'AM'}`}
+                    </span>
                   </div>
                 </div>
               )}
+
+              {/* Phase 2: 24-hour conversion times (12:30 and 13:05) */}
+              {isTimeMovingUp && show24HourTimes && !clocksColored && (
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-500 text-sm font-medium">Start Time:</span>
+                    <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                      {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {isTimeMovingUp && show24HourTimes && !clocksColored && (
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'}`}>
+                  <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
+                    <span className="text-red-500 text-sm font-medium">End Time:</span>
+                    <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
+                      {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Arrow element */}
               {isTimeMovingUp && showArrows && showArrow && (
                 <div className={`absolute left-[205px] top-[168px] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="ml-12">
@@ -1439,12 +1344,15 @@ const ElapsedTime = () => {
                   </div>
                 </div>
               )}
-              {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'} ${isStartTimeMovingLeft ? 'move-start-time-left' : ''} ${isInputsAnimatingToText ? 'move-start-time-down' : ''}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-500 text-sm font-medium">Start Time:</span>
-                    {clocksColored ? (
-                      <div className="flex items-center gap-1">
+
+              {/* Phase 3: Interactive input fields */}
+              {clocksColored && showInputs && (
+                <>
+                  {/* Interactive Start Time Input */}
+                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[112px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-start-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                    <div className="flex items-center gap-2 w-full">
+                      <span className="text-blue-500 text-sm font-medium whitespace-nowrap">Start Time:</span>
+                      <div className="flex items-center gap-1 flex-nowrap">
                         {!isInputsAnimatingToText ? (
                           <>
                             <input
@@ -1494,30 +1402,48 @@ const ElapsedTime = () => {
                             </button>
                           </>
                         ) : (
-                          <span className={`text-blue-500 text-sm font-medium ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
-                          </span>
-                        )}
-                        {showStartTimePlus12 && (
-                          <span className="text-black font-bold text-xs ml-1 fade-in-down">
-                            +12 hours
-                          </span>
+                          <>
+                            <input
+                              type="text"
+                              value={startHoursInput}
+                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
+                              maxLength={2}
+                              readOnly
+                            />
+                            <span className="text-blue-500 text-sm font-medium fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
+                            <input
+                              type="text"
+                              value={startMinutesInput}
+                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
+                              maxLength={2}
+                              readOnly
+                            />
+                            <button className="text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
+                              {startTimeAMPM}
+                            </button>
+                            {showStartTimeText && (
+                              <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
+                                {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
+                              </span>
+                            )}
+                            {showStartTimePlus12 && (
+                              <span className="text-black font-bold text-xs ml-1 whitespace-nowrap fade-in-down">
+                                +12 hours
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
-                    ) : (
-                      <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
-                        {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
-                      </span>
-                    )}
+                    </div>
                   </div>
-                </div>
-              )}
-              {isTimeMovingUp && show24HourTimes && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'} ${isEndTimeMovingLeft ? 'move-end-time-left' : ''} ${isInputsAnimatingToText ? 'move-end-time-down' : ''}`}>
-                  <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
-                    <span className="text-red-500 text-sm font-medium">End Time:</span>
-                    {clocksColored ? (
-                      <div className="flex items-center gap-1">
+
+                  {/* Interactive End Time Input */}
+                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[77px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-end-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                    <div className={`flex items-center gap-2 w-full ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
+                      <span className="text-red-500 text-sm font-medium whitespace-nowrap">End Time:</span>
+                      <div className="flex items-center gap-1 flex-nowrap">
                         {!isInputsAnimatingToText ? (
                           <>
                             <input
@@ -1547,23 +1473,43 @@ const ElapsedTime = () => {
                             </button>
                           </>
                         ) : (
-                          <span className={`text-red-500 text-sm font-medium ${showEndTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                            {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
-                          </span>
-                        )}
-                        {showEndTimePlus12 && (
-                          <span className="text-black font-bold text-xs ml-1 fade-in-down">
-                            +12 hours
-                          </span>
+                          <>
+                            <input
+                              type="text"
+                              value={endHoursInput}
+                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
+                              maxLength={2}
+                              readOnly
+                            />
+                            <span className="text-red-500 text-sm font-medium fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
+                            <input
+                              type="text"
+                              value={endMinutesInput}
+                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
+                              maxLength={2}
+                              readOnly
+                            />
+                            <button className="text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
+                              {endTimeAMPM}
+                            </button>
+                            {showEndTimeText && (
+                              <span className="text-red-500 text-sm font-medium whitespace-nowrap fade-in-down">
+                                {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
+                              </span>
+                            )}
+                            {showEndTimePlus12 && (
+                              <span className="text-black font-bold text-xs ml-1 whitespace-nowrap fade-in-down">
+                                +12 hours
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
-                    ) : (
-                      <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
-                        {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
-                      </span>
-                    )}
+                    </div>
                   </div>
-                </div>
+                </>
               )}
               {showUnderline && (
                 <>
