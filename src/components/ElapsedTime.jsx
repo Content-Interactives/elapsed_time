@@ -174,6 +174,113 @@ const ElapsedTime = () => {
   const [endTimeAnimationStep, setEndTimeAnimationStep] = useState(0);
   const [isInputsMovingLeft, setIsInputsMovingLeft] = useState(false);
 
+  // Function to skip to input steps
+  const handleSkipToInput = () => {
+    // Reset all states to initial values first
+    setShowButton(false);
+    setIsButtonShrinking(false);
+    setShowText(false);
+    setShowEndTime(false);
+    setShowStartTime(false);
+    setShowClock(false);
+    setIsClockShrinking(false);
+    setIsTimeMovingUp(false);
+    setShowArrows(false);
+    setShow24HourTimes(false);
+    setShowExplanation(false);
+    setShowSecondExplanation(false);
+    setShowSecondContinue(false);
+    setIsSecondTextShrinking(false);
+    setIsSecondButtonShrinking(false);
+    setEndTime({ hours: 12, minutes: 30 });
+    setIsMoving(false);
+    setShowContinue(false);
+    setIsContinueShrinking(false);
+    setHasReachedTarget(false);
+    setIsButtonPressed(false);
+    setShowFirstTimes(false);
+    setIsFirstTimesShrinking(false);
+    setShowArrow(false);
+    setIsArrowShrinking(false);
+    setIs24HourTimesRising(false);
+    setIsEndTimeRising(false);
+    setIsStartTimeRising(false);
+    setShowUnderline(false);
+    setShowElapsedTime(false);
+    setShowFinalText(false);
+    setShowFinalContinue(false);
+    setIsFinalTextShrinking(false);
+    setIsFinalButtonShrinking(false);
+    setHideUnderline(false);
+    setIsElapsedTimeRising(false);
+    setShowCompletionText(false);
+    setIsClockShrinkingFinal(false);
+    setIsClockMovingUp(false);
+    setShowSecondClock(false);
+    setClocksColored(false);
+    setStartTimeInput('1230');
+    setEndTimeInput('1305');
+    setStartHoursInput('12');
+    setStartMinutesInput('30');
+    setEndHoursInput('1');
+    setEndMinutesInput('05');
+    setIsTextFadingOut(false);
+    setIsInputFadingIn(false);
+    setIsStartTimeMovingUp(false);
+    setIsEndTimeMovingUp(false);
+    setShowInputs(false);
+    setStartTimeAMPM('PM');
+    setEndTimeAMPM('PM');
+    setIsStartTimeMovingLeft(false);
+    setIsEndTimeMovingLeft(false);
+    setIsUnderlineMovingLeft(false);
+    setIsElapsedTimeMovingLeft(false);
+    setIsInputsDirty(false);
+    setShowSolveButton(false);
+    setIsInputsAnimatingToText(false);
+    setShowStartTimeText(false);
+    setShowEndTimeText(false);
+    setShowStartTimePlus12(false);
+    setShowEndTimePlus12(false);
+    setShowStartTime24Hour(false);
+    setShowEndTime24Hour(false);
+    setIsStartTimeAnimating(false);
+    setIsEndTimeAnimating(false);
+    setStartTimeAnimationStep(0);
+    setEndTimeAnimationStep(0);
+    setIsInputsMovingLeft(false);
+
+    // Then immediately show the input phase with proper sequencing
+    setTimeout(() => {
+      // Show clocks first
+      setShowClock(true);
+      setShowSecondClock(true);
+      
+      // Set clock colors and positions
+      setClocksColored(true);
+      setIsClockMovingUp(true);
+      setIsClockShrinkingFinal(true);
+      
+      // Show the equation elements
+      setShowUnderline(true);
+      setShowElapsedTime(true);
+      
+      // Show inputs with fade-in animation
+      setShowInputs(true);
+      setIsInputFadingIn(true);
+      
+      // Show completion text
+      setShowCompletionText(true);
+      
+      // Trigger the left movement animations for equation elements
+      setTimeout(() => {
+        setIsUnderlineMovingLeft(true);
+        setIsElapsedTimeMovingLeft(true);
+        setIsInputsMovingLeft(true);
+      }, 100);
+    }, 100);
+  };
+
   // Function to format time input for display
   const formatTimeInput = (input) => {
     if (input.length >= 2) {
@@ -1570,6 +1677,16 @@ const ElapsedTime = () => {
             )}
           </div>
         </div>
+      </div>
+      
+      {/* Temporary Skip to Input Button */}
+      <div className="w-[464px] mx-auto mt-4 flex justify-center">
+        <button
+          onClick={handleSkipToInput}
+          className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-md transition-colors font-medium"
+        >
+          Skip to Input (Temporary)
+        </button>
       </div>
     </div>
   );
