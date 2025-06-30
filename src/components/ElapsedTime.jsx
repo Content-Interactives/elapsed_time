@@ -173,113 +173,27 @@ const ElapsedTime = () => {
   const [startTimeAnimationStep, setStartTimeAnimationStep] = useState(0);
   const [endTimeAnimationStep, setEndTimeAnimationStep] = useState(0);
   const [isInputsMovingLeft, setIsInputsMovingLeft] = useState(false);
+  const [isStartTimeTextGrowing, setIsStartTimeTextGrowing] = useState(false);
+  const [isEndTimeTextGrowing, setIsEndTimeTextGrowing] = useState(false);
+  const [isStartTimePlus12Growing, setIsStartTimePlus12Growing] = useState(false);
+  const [isEndTimePlus12Growing, setIsEndTimePlus12Growing] = useState(false);
+  const [isStartTimePlus12MovingLeft, setIsStartTimePlus12MovingLeft] = useState(false);
+  const [isEndTimePlus12MovingLeft, setIsEndTimePlus12MovingLeft] = useState(false);
+  const [bothTimesIn24HourFormat, setBothTimesIn24HourFormat] = useState(false);
+  const [showEndTimePlus24, setShowEndTimePlus24] = useState(false);
+  const [isEndTimePlus24Growing, setIsEndTimePlus24Growing] = useState(false);
+  const [isEndTimePlus24MovingLeft, setIsEndTimePlus24MovingLeft] = useState(false);
+  const [endTimePlus24AnimationStep, setEndTimePlus24AnimationStep] = useState(0);
+  const [isEndTimePlus24Animating, setIsEndTimePlus24Animating] = useState(false);
+  const [has24TextFadedOut, setHas24TextFadedOut] = useState(false);
+  const [showEndTimeAfter12Hours, setShowEndTimeAfter12Hours] = useState(false);
+  const [isElapsedTimeFadingOut, setIsElapsedTimeFadingOut] = useState(false);
+  const [showElapsedTimeAnswer, setShowElapsedTimeAnswer] = useState(false);
+  const [isElapsedTimeFadingIn, setIsElapsedTimeFadingIn] = useState(false);
+  const [showNewSolveButton, setShowNewSolveButton] = useState(false);
+  const [isInputsReenabled, setIsInputsReenabled] = useState(false);
+  const [isNewSolveButtonGrowing, setIsNewSolveButtonGrowing] = useState(false);
 
-  // Function to skip to input steps
-  const handleSkipToInput = () => {
-    // Reset all states to initial values first
-    setShowButton(false);
-    setIsButtonShrinking(false);
-    setShowText(false);
-    setShowEndTime(false);
-    setShowStartTime(false);
-    setShowClock(false);
-    setIsClockShrinking(false);
-    setIsTimeMovingUp(false);
-    setShowArrows(false);
-    setShow24HourTimes(false);
-    setShowExplanation(false);
-    setShowSecondExplanation(false);
-    setShowSecondContinue(false);
-    setIsSecondTextShrinking(false);
-    setIsSecondButtonShrinking(false);
-    setEndTime({ hours: 12, minutes: 30 });
-    setIsMoving(false);
-    setShowContinue(false);
-    setIsContinueShrinking(false);
-    setHasReachedTarget(false);
-    setIsButtonPressed(false);
-    setShowFirstTimes(false);
-    setIsFirstTimesShrinking(false);
-    setShowArrow(false);
-    setIsArrowShrinking(false);
-    setIs24HourTimesRising(false);
-    setIsEndTimeRising(false);
-    setIsStartTimeRising(false);
-    setShowUnderline(false);
-    setShowElapsedTime(false);
-    setShowFinalText(false);
-    setShowFinalContinue(false);
-    setIsFinalTextShrinking(false);
-    setIsFinalButtonShrinking(false);
-    setHideUnderline(false);
-    setIsElapsedTimeRising(false);
-    setShowCompletionText(false);
-    setIsClockShrinkingFinal(false);
-    setIsClockMovingUp(false);
-    setShowSecondClock(false);
-    setClocksColored(false);
-    setStartTimeInput('1230');
-    setEndTimeInput('1305');
-    setStartHoursInput('12');
-    setStartMinutesInput('30');
-    setEndHoursInput('1');
-    setEndMinutesInput('05');
-    setIsTextFadingOut(false);
-    setIsInputFadingIn(false);
-    setIsStartTimeMovingUp(false);
-    setIsEndTimeMovingUp(false);
-    setShowInputs(false);
-    setStartTimeAMPM('PM');
-    setEndTimeAMPM('PM');
-    setIsStartTimeMovingLeft(false);
-    setIsEndTimeMovingLeft(false);
-    setIsUnderlineMovingLeft(false);
-    setIsElapsedTimeMovingLeft(false);
-    setIsInputsDirty(false);
-    setShowSolveButton(false);
-    setIsInputsAnimatingToText(false);
-    setShowStartTimeText(false);
-    setShowEndTimeText(false);
-    setShowStartTimePlus12(false);
-    setShowEndTimePlus12(false);
-    setShowStartTime24Hour(false);
-    setShowEndTime24Hour(false);
-    setIsStartTimeAnimating(false);
-    setIsEndTimeAnimating(false);
-    setStartTimeAnimationStep(0);
-    setEndTimeAnimationStep(0);
-    setIsInputsMovingLeft(false);
-
-    // Then immediately show the input phase with proper sequencing
-    setTimeout(() => {
-      // Show clocks first
-      setShowClock(true);
-      setShowSecondClock(true);
-      
-      // Set clock colors and positions
-      setClocksColored(true);
-      setIsClockMovingUp(true);
-      setIsClockShrinkingFinal(true);
-      
-      // Show the equation elements
-      setShowUnderline(true);
-      setShowElapsedTime(true);
-      
-      // Show inputs with fade-in animation
-      setShowInputs(true);
-      setIsInputFadingIn(true);
-      
-      // Show completion text
-      setShowCompletionText(true);
-      
-      // Trigger the left movement animations for equation elements
-      setTimeout(() => {
-        setIsUnderlineMovingLeft(true);
-        setIsElapsedTimeMovingLeft(true);
-        setIsInputsMovingLeft(true);
-      }, 100);
-    }, 100);
-  };
 
   // Function to format time input for display
   const formatTimeInput = (input) => {
@@ -334,17 +248,14 @@ const ElapsedTime = () => {
       if (hours >= 1 && hours <= 12) {
         setTime({ hours, minutes });
         
-        // Update AM/PM based on 24-hour time
-        if (hours >= 12) {
-          setAMPM('PM');
-        } else {
-          setAMPM('AM');
-        }
+        // Don't automatically update AM/PM - let user control it manually
       }
       
       // Mark inputs as dirty and show solve button
       setIsInputsDirty(true);
       setShowSolveButton(true);
+      // Reset elapsed time to question marks when input changes
+      setShowElapsedTimeAnswer(false);
     }
   };
 
@@ -361,12 +272,7 @@ const ElapsedTime = () => {
     setHoursInput(correctedValue);
     setTime({ hours, minutes });
     
-    // Update AM/PM based on 24-hour time
-    if (hours >= 12) {
-      setAMPM('PM');
-    } else {
-      setAMPM('AM');
-    }
+    // Don't automatically update AM/PM - let user control it manually
   };
 
   // Function to handle minute input changes
@@ -393,6 +299,8 @@ const ElapsedTime = () => {
       // Mark inputs as dirty and show solve button
       setIsInputsDirty(true);
       setShowSolveButton(true);
+      // Reset elapsed time to question marks when input changes
+      setShowElapsedTimeAnswer(false);
     }
   };
 
@@ -421,6 +329,42 @@ const ElapsedTime = () => {
     // Mark inputs as dirty and show solve button
     setIsInputsDirty(true);
     setShowSolveButton(true);
+    // Reset elapsed time to question marks when AM/PM changes
+    setShowElapsedTimeAnswer(false);
+  };
+
+  // Function to check if end time is before start time (crossing midnight)
+  const needs24MoreHours = () => {
+    const startHours = parseInt(startHoursInput) || 0;
+    const startMinutes = parseInt(startMinutesInput) || 0;
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    if (startHours >= 1 && startHours <= 12 && startMinutes >= 0 && startMinutes <= 59 &&
+        endHours >= 1 && endHours <= 12 && endMinutes >= 0 && endMinutes <= 59) {
+      
+      // Convert 12-hour format to 24-hour format for comparison
+      let start24Hours = startHours;
+      if (startTimeAMPM === 'PM' && startHours !== 12) {
+        start24Hours = startHours + 12;
+      } else if (startTimeAMPM === 'AM' && startHours === 12) {
+        start24Hours = 0;
+      }
+      
+      let end24Hours = endHours;
+      if (endTimeAMPM === 'PM' && endHours !== 12) {
+        end24Hours = endHours + 12;
+      } else if (endTimeAMPM === 'AM' && endHours === 12) {
+        end24Hours = 0;
+      }
+      
+      const startTotalMinutes = start24Hours * 60 + startMinutes;
+      const endTotalMinutes = end24Hours * 60 + endMinutes;
+      
+      // If end time is before start time, we need to add 24 hours
+      return endTotalMinutes < startTotalMinutes;
+    }
+    return false;
   };
 
   const handleSolve = () => {
@@ -442,42 +386,447 @@ const ElapsedTime = () => {
     // Start the animation sequence - end time first, then start time
     setTimeout(() => {
       setShowEndTimeText(true);
+      setIsEndTimeTextGrowing(true);
       setTimeout(() => {
         setShowStartTimeText(true);
+        setIsStartTimeTextGrowing(true);
         
         // After the time text appears, show 24-hour format times with delay
         setTimeout(() => {
-          if (startTimeAMPM === 'PM' && startHours !== 12) {
-            setIsStartTimeAnimating(true);
-            // Start gradual animation for start time
-            let step = 0;
-            const startInterval = setInterval(() => {
-              step++;
-              setStartTimeAnimationStep(step);
-              if (step >= 12) {
-                clearInterval(startInterval);
-                setIsStartTimeAnimating(false);
-                setShowStartTime24Hour(true);
-              }
-            }, 100); // 100ms between each increment
-          }
-          if (endTimeAMPM === 'PM' && endHours !== 12) {
-            setIsEndTimeAnimating(true);
-            // Start gradual animation for end time
-            let step = 0;
-            const endInterval = setInterval(() => {
-              step++;
-              setEndTimeAnimationStep(step);
-              if (step >= 12) {
-                clearInterval(endInterval);
-                setIsEndTimeAnimating(false);
+          // Don't set 24-hour format flags immediately - wait for animations to complete
+          
+          // Check if any time needs +12 hour conversion
+          const needsStartConversion = startTimeAMPM === 'PM' && startHours !== 12;
+          const needsEndConversion = endTimeAMPM === 'PM' && endHours !== 12;
+          const hasAnyConversion = needsStartConversion || needsEndConversion;
+          
+          // Calculate dynamic delays based on what animations are needed
+          const endTimeConversionDelay = needsEndConversion ? 1200 : 500; // +12 animation takes ~1200ms, no conversion takes 500ms
+          const startTimeConversionDelay = needsStartConversion ? 1200 : 500;
+          const plus24Delay = needs24MoreHours() ? 1200 : 0; // +24 animation takes ~1200ms
+          
+          // Track when both times are in 24-hour format
+          let startTimeComplete = false;
+          let endTimeComplete = false;
+          
+          // Start with end time conversion first
+          if (needsEndConversion) {
+            setIsEndTimePlus12Growing(true);
+            // Wait for grow-in animation, then start left movement
+            setTimeout(() => {
+              setIsEndTimePlus12Growing(false);
+              setIsEndTimePlus12MovingLeft(true);
+              // Wait for left movement, then start hour animation
+              setTimeout(() => {
+                setIsEndTimeAnimating(true);
+                // Start gradual animation for end time
+                let step = 0;
+                const endInterval = setInterval(() => {
+                  step++;
+                  setEndTimeAnimationStep(step);
+                  if (step >= 12) {
+                    clearInterval(endInterval);
+                    setIsEndTimeAnimating(false);
+                    setShowEndTimeAfter12Hours(true);
+                    // Don't set showEndTime24Hour here - wait until after +24 animation if needed
+                    endTimeComplete = true;
+                    
+                    // Now start start time conversion after end time is complete
+                    setTimeout(() => {
+                      if (needsStartConversion) {
+                        setIsStartTimePlus12Growing(true);
+                        // Wait for grow-in animation, then start left movement
+                        setTimeout(() => {
+                          setIsStartTimePlus12Growing(false);
+                          setIsStartTimePlus12MovingLeft(true);
+                          // Wait for left movement, then start hour animation
+                          setTimeout(() => {
+                            setIsStartTimeAnimating(true);
+                            // Start gradual animation for start time
+                            let step = 0;
+                            const startInterval = setInterval(() => {
+                              step++;
+                              setStartTimeAnimationStep(step);
+                              if (step >= 12) {
+                                clearInterval(startInterval);
+                                setIsStartTimeAnimating(false);
+                                setShowStartTime24Hour(true);
+                                startTimeComplete = true;
+                                
+                                // Now check if we need to add 24 more hours for midnight crossing
+                                if (needs24MoreHours()) {
+                                  setTimeout(() => {
+                                    setShowEndTimePlus24(true);
+                                    setIsEndTimePlus24Growing(true);
+                                    setTimeout(() => {
+                                      setIsEndTimePlus24Growing(false);
+                                      setIsEndTimePlus24MovingLeft(true);
+                                      // Wait for the +24 text to fade out (500ms), then start the +24 animation
+                                      setTimeout(() => {
+                                        setHas24TextFadedOut(true);
+                                        setIsEndTimePlus24Animating(true);
+                                        let plus24Step = 0;
+                                        const plus24Interval = setInterval(() => {
+                                          plus24Step++;
+                                          setEndTimePlus24AnimationStep(plus24Step);
+                                          if (plus24Step >= 24) {
+                                            clearInterval(plus24Interval);
+                                            setIsEndTimePlus24Animating(false);
+                                            // Now set the end time to 24-hour format after +24 animation completes
+                                            setShowEndTime24Hour(true);
+                                            setBothTimesIn24HourFormat(true);
+                                            // Trigger elapsed time animation after both times finish
+                                            setTimeout(() => {
+                                              setIsElapsedTimeFadingOut(true);
+                                              setTimeout(() => {
+                                                setShowElapsedTimeAnswer(true);
+                                                setIsElapsedTimeFadingIn(true);
+                                                // After showing the answer, re-enable inputs for new calculations
+                                                setTimeout(() => {
+                                                  reenableInputs();
+                                                }, 2000); // Increased from 1000ms to 2000ms
+                                              }, 400); // 400ms fade out
+                                            }, 800); // Increased from 400ms to 800ms
+                                          }
+                                        }, 100);
+                                      }, 600); // Wait for +24 text to fade out completely
+                                    }, 600);
+                                  }, 300);
+                                } else {
+                                  // If no +24 needed, set end time to 24-hour format now
+                                  setShowEndTime24Hour(true);
+                                  setBothTimesIn24HourFormat(true);
+                                  // Trigger elapsed time animation after both times finish
+                                  setTimeout(() => {
+                                    setIsElapsedTimeFadingOut(true);
+                                    setTimeout(() => {
+                                      setShowElapsedTimeAnswer(true);
+                                      setIsElapsedTimeFadingIn(true);
+                                      // After showing the answer, re-enable inputs for new calculations
+                                      setTimeout(() => {
+                                        reenableInputs();
+                                      }, 2000); // Increased from 1000ms to 2000ms
+                                    }, 400); // 400ms fade out
+                                  }, 800); // Increased from 400ms to 800ms
+                                }
+                              }
+                            }, 100); // 100ms between each increment
+                          }, 600); // Wait for grow-in animation + delay
+                        }, 600); // Wait for grow-in animation + delay
+                      } else {
+                        // For start times that don't need conversion
+                        setShowStartTime24Hour(true);
+                        startTimeComplete = true;
+                        
+                        // Now check if we need to add 24 more hours for midnight crossing
+                        if (needs24MoreHours()) {
+                          setTimeout(() => {
+                            setShowEndTimePlus24(true);
+                            setIsEndTimePlus24Growing(true);
+                            setTimeout(() => {
+                              setIsEndTimePlus24Growing(false);
+                              setIsEndTimePlus24MovingLeft(true);
+                              // Wait for the +24 text to fade out (500ms), then start the +24 animation
+                              setTimeout(() => {
+                                setHas24TextFadedOut(true);
+                                setIsEndTimePlus24Animating(true);
+                                let plus24Step = 0;
+                                const plus24Interval = setInterval(() => {
+                                  plus24Step++;
+                                  setEndTimePlus24AnimationStep(plus24Step);
+                                  if (plus24Step >= 24) {
+                                    clearInterval(plus24Interval);
+                                    setIsEndTimePlus24Animating(false);
+                                    // Now set the end time to 24-hour format after +24 animation completes
+                                    setShowEndTime24Hour(true);
+                                    setBothTimesIn24HourFormat(true);
+                                    // Trigger elapsed time animation after both times finish
+                                    setTimeout(() => {
+                                      setIsElapsedTimeFadingOut(true);
+                                      setTimeout(() => {
+                                        setShowElapsedTimeAnswer(true);
+                                        setIsElapsedTimeFadingIn(true);
+                                        // After showing the answer, re-enable inputs for new calculations
+                                        setTimeout(() => {
+                                          reenableInputs();
+                                        }, 2000); // Increased from 1000ms to 2000ms
+                                      }, 400); // 400ms fade out
+                                    }, 800); // Increased from 400ms to 800ms
+                                  }
+                                }, 100);
+                              }, 600); // Wait for +24 text to fade out completely
+                            }, 600);
+                          }, 300);
+                        } else {
+                          // If no +24 needed, set end time to 24-hour format now
+                          setShowEndTime24Hour(true);
+                          setBothTimesIn24HourFormat(true);
+                          // Trigger elapsed time animation after both times finish
+                          setTimeout(() => {
+                            setIsElapsedTimeFadingOut(true);
+                            setTimeout(() => {
+                              setShowElapsedTimeAnswer(true);
+                              setIsElapsedTimeFadingIn(true);
+                              // After showing the answer, re-enable inputs for new calculations
+                              setTimeout(() => {
+                                reenableInputs();
+                              }, 2000); // Increased from 1000ms to 2000ms
+                            }, 400); // 400ms fade out
+                          }, 800); // Increased from 400ms to 800ms
+                        }
+                      }
+                    }, 300); // 300ms delay between end time and start time conversions
+                  }
+                }, 100); // 100ms between each increment
+              }, 600); // Wait for grow-in animation + delay
+            }, 600); // Wait for grow-in animation + delay
+          } else {
+            // For end times that don't need conversion, check if we need +24 hours
+            if (needs24MoreHours()) {
+              setTimeout(() => {
+                // Don't set showEndTime24Hour here - wait until after +24 animation
+                endTimeComplete = true;
+                
+                // Now start start time conversion after end time is complete
+                setTimeout(() => {
+                  if (needsStartConversion) {
+                    setIsStartTimePlus12Growing(true);
+                    // Wait for grow-in animation, then start left movement
+                    setTimeout(() => {
+                      setIsStartTimePlus12Growing(false);
+                      setIsStartTimePlus12MovingLeft(true);
+                      // Wait for left movement, then start hour animation
+                      setTimeout(() => {
+                        setIsStartTimeAnimating(true);
+                        // Start gradual animation for start time
+                        let step = 0;
+                        const startInterval = setInterval(() => {
+                          step++;
+                          setStartTimeAnimationStep(step);
+                          if (step >= 12) {
+                            clearInterval(startInterval);
+                            setIsStartTimeAnimating(false);
+                            setShowStartTime24Hour(true);
+                            startTimeComplete = true;
+                            
+                            // Now add 24 more hours for midnight crossing
+                            setTimeout(() => {
+                              setShowEndTimePlus24(true);
+                              setIsEndTimePlus24Growing(true);
+                              setTimeout(() => {
+                                setIsEndTimePlus24Growing(false);
+                                setIsEndTimePlus24MovingLeft(true);
+                                // Wait for the +24 text to fade out (500ms), then start the +24 animation
+                                setTimeout(() => {
+                                  setHas24TextFadedOut(true);
+                                  setIsEndTimePlus24Animating(true);
+                                  let plus24Step = 0;
+                                  const plus24Interval = setInterval(() => {
+                                    plus24Step++;
+                                    setEndTimePlus24AnimationStep(plus24Step);
+                                    if (plus24Step >= 24) {
+                                      clearInterval(plus24Interval);
+                                      setIsEndTimePlus24Animating(false);
+                                      // Now set the end time to 24-hour format after +24 animation completes
+                                      setShowEndTime24Hour(true);
+                                      setBothTimesIn24HourFormat(true);
+                                      // Trigger elapsed time animation after both times finish
+                                      setTimeout(() => {
+                                        setIsElapsedTimeFadingOut(true);
+                                        setTimeout(() => {
+                                          setShowElapsedTimeAnswer(true);
+                                          setIsElapsedTimeFadingIn(true);
+                                          // After showing the answer, re-enable inputs for new calculations
+                                          setTimeout(() => {
+                                            reenableInputs();
+                                          }, 2000); // Increased from 1000ms to 2000ms
+                                        }, 400); // 400ms fade out
+                                      }, 800); // Increased from 400ms to 800ms
+                                    }
+                                  }, 100);
+                                }, 600); // Wait for +24 text to fade out completely
+                              }, 600);
+                            }, 300);
+                          }
+                        }, 100); // 100ms between each increment
+                      }, 600); // Wait for grow-in animation + delay
+                    }, 600); // Wait for grow-in animation + delay
+                  } else {
+                    // For start times that don't need conversion
+                    setShowStartTime24Hour(true);
+                    startTimeComplete = true;
+                    
+                    // Now add 24 more hours for midnight crossing
+                    setTimeout(() => {
+                      setShowEndTimePlus24(true);
+                      setIsEndTimePlus24Growing(true);
+                      setTimeout(() => {
+                        setIsEndTimePlus24Growing(false);
+                        setIsEndTimePlus24MovingLeft(true);
+                        // Wait for the +24 text to fade out (500ms), then start the +24 animation
+                        setTimeout(() => {
+                          setHas24TextFadedOut(true);
+                          setIsEndTimePlus24Animating(true);
+                          let plus24Step = 0;
+                          const plus24Interval = setInterval(() => {
+                            plus24Step++;
+                            setEndTimePlus24AnimationStep(plus24Step);
+                            if (plus24Step >= 24) {
+                              clearInterval(plus24Interval);
+                              setIsEndTimePlus24Animating(false);
+                              // Now set the end time to 24-hour format after +24 animation completes
+                              setShowEndTime24Hour(true);
+                              setBothTimesIn24HourFormat(true);
+                              // Trigger elapsed time animation after both times finish
+                              setTimeout(() => {
+                                setIsElapsedTimeFadingOut(true);
+                                setTimeout(() => {
+                                  setShowElapsedTimeAnswer(true);
+                                  setIsElapsedTimeFadingIn(true);
+                                  // After showing the answer, re-enable inputs for new calculations
+                                  setTimeout(() => {
+                                    reenableInputs();
+                                  }, 2000); // Increased from 1000ms to 2000ms
+                                }, 400); // 400ms fade out
+                              }, 800); // Increased from 400ms to 800ms
+                            }
+                          }, 100);
+                        }, 600); // Wait for +24 text to fade out completely
+                      }, 600);
+                    }, 300);
+                  }
+                }, 300); // 300ms delay between end time and start time conversions
+              }, 500); // Use shorter delay when no end time conversion needed
+            } else {
+              // For end times that don't need conversion, wait for the appropriate time
+              setTimeout(() => {
                 setShowEndTime24Hour(true);
-              }
-            }, 100); // 100ms between each increment
+                endTimeComplete = true;
+                
+                // Now start start time conversion after end time is complete
+                setTimeout(() => {
+                  if (needsStartConversion) {
+                    setIsStartTimePlus12Growing(true);
+                    // Wait for grow-in animation, then start left movement
+                    setTimeout(() => {
+                      setIsStartTimePlus12Growing(false);
+                      setIsStartTimePlus12MovingLeft(true);
+                      // Wait for left movement, then start hour animation
+                      setTimeout(() => {
+                        setIsStartTimeAnimating(true);
+                        // Start gradual animation for start time
+                        let step = 0;
+                        const startInterval = setInterval(() => {
+                          step++;
+                          setStartTimeAnimationStep(step);
+                          if (step >= 12) {
+                            clearInterval(startInterval);
+                            setIsStartTimeAnimating(false);
+                            setShowStartTime24Hour(true);
+                            startTimeComplete = true;
+                            setBothTimesIn24HourFormat(true);
+                            // Trigger elapsed time animation after both times finish
+                            setTimeout(() => {
+                              setIsElapsedTimeFadingOut(true);
+                              setTimeout(() => {
+                                setShowElapsedTimeAnswer(true);
+                                setIsElapsedTimeFadingIn(true);
+                                // After showing the answer, re-enable inputs for new calculations
+                                setTimeout(() => {
+                                  reenableInputs();
+                                }, 2000); // Increased from 1000ms to 2000ms
+                              }, 400); // 400ms fade out
+                            }, 800); // Increased from 400ms to 800ms
+                          }
+                        }, 100); // 100ms between each increment
+                      }, 600); // Wait for grow-in animation + delay
+                    }, 600); // Wait for grow-in animation + delay
+                  } else {
+                    // For start times that don't need conversion
+                    setShowStartTime24Hour(true);
+                    startTimeComplete = true;
+                    setBothTimesIn24HourFormat(true);
+                    // Trigger elapsed time animation after both times finish
+                    setTimeout(() => {
+                      setIsElapsedTimeFadingOut(true);
+                      setTimeout(() => {
+                        setShowElapsedTimeAnswer(true);
+                        setIsElapsedTimeFadingIn(true);
+                        // After showing the answer, re-enable inputs for new calculations
+                        setTimeout(() => {
+                          reenableInputs();
+                        }, 2000); // Increased from 1000ms to 2000ms
+                      }, 400); // 400ms fade out
+                    }, 800); // Increased from 400ms to 800ms
+                  }
+                }, 300); // 300ms delay between end time and start time conversions
+              }, 500); // Use shorter delay when no end time conversion needed
+            }
           }
         }, 800);
       }, 300);
     }, 200);
+  };
+
+  // Function to re-enable inputs after solve animation completes
+  const reenableInputs = () => {
+    // Reset animation states
+    setIsInputsAnimatingToText(false);
+    setShowStartTimeText(false);
+    setShowEndTimeText(false);
+    setShowStartTimePlus12(false);
+    setShowEndTimePlus12(false);
+    setShowStartTime24Hour(false);
+    setShowEndTime24Hour(false);
+    setIsStartTimeAnimating(false);
+    setIsEndTimeAnimating(false);
+    setStartTimeAnimationStep(0);
+    setEndTimeAnimationStep(0);
+    setIsStartTimeTextGrowing(false);
+    setIsEndTimeTextGrowing(false);
+    setIsStartTimePlus12Growing(false);
+    setIsEndTimePlus12Growing(false);
+    setIsStartTimePlus12MovingLeft(false);
+    setIsEndTimePlus12MovingLeft(false);
+    setBothTimesIn24HourFormat(false);
+    setShowEndTimePlus24(false);
+    setIsEndTimePlus24Growing(false);
+    setIsEndTimePlus24MovingLeft(false);
+    setEndTimePlus24AnimationStep(0);
+    setIsEndTimePlus24Animating(false);
+    setHas24TextFadedOut(false);
+    setShowEndTimeAfter12Hours(false);
+    setIsElapsedTimeFadingOut(false);
+    // Don't reset the elapsed time answer - keep it visible
+    // setShowElapsedTimeAnswer(false);
+    setIsElapsedTimeFadingIn(false);
+    
+    // Keep the left movement animations in their final state (true) so they don't retrigger
+    // setIsUnderlineMovingLeft(false);
+    // setIsElapsedTimeMovingLeft(false);
+    // setIsInputsMovingLeft(false);
+    
+    // Add delay before re-enabling inputs
+    setTimeout(() => {
+      // Re-enable inputs
+      setIsInputsReenabled(true);
+      setIsInputsDirty(false);
+    }, 800); // 800ms delay before inputs reappear
+    
+    // Don't automatically show solve button - only show when inputs are changed
+    // setTimeout(() => {
+    //   setShowSolveButton(true);
+    // }, 500);
+  };
+
+  // Function to handle new solve button click
+  const handleNewSolve = () => {
+    setShowNewSolveButton(false);
+    setIsNewSolveButtonGrowing(false);
+    setIsInputsReenabled(false);
+    // Reset elapsed time to question marks when solve button is clicked
+    setShowElapsedTimeAnswer(false);
+    handleSolve();
   };
 
   // Function to calculate elapsed time
@@ -505,9 +854,14 @@ const ElapsedTime = () => {
         end24Hours = 0;
       }
       
+      // Add 24 hours if crossing midnight
+      if (needs24MoreHours()) {
+        end24Hours += 24;
+      }
+      
       const startTotalMinutes = start24Hours * 60 + startMinutes;
       const endTotalMinutes = end24Hours * 60 + endMinutes;
-      const elapsedMinutes = Math.abs(endTotalMinutes - startTotalMinutes);
+      const elapsedMinutes = endTotalMinutes - startTotalMinutes;
       const hours = Math.floor(elapsedMinutes / 60);
       const minutes = elapsedMinutes % 60;
       return { hours, minutes };
@@ -563,6 +917,11 @@ const ElapsedTime = () => {
       end24Hours = 0;
     }
     
+    // Add 24 more hours if crossing midnight
+    if (needs24MoreHours()) {
+      end24Hours += 24;
+    }
+    
     return `${end24Hours}:${String(endMinutes).padStart(2, '0')}`;
   };
 
@@ -585,6 +944,48 @@ const ElapsedTime = () => {
     } else {
       return `${animatedHours}:${String(endMinutes).padStart(2, '0')}`;
     }
+  };
+
+  // Helper function to get animated end time with +24 hours after text fades out
+  const getEndTimeWith24Hours = () => {
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    let animatedHours = endHours;
+    if (endTimeAMPM === 'PM' && endHours !== 12) {
+      // Add animation steps (0 to 12)
+      animatedHours = endHours + endTimeAnimationStep;
+    } else if (endTimeAMPM === 'AM' && endHours === 12) {
+      animatedHours = endTimeAnimationStep;
+    }
+    
+    // If we're animating the +24 hours, add those as well
+    if (isEndTimePlus24Animating) {
+      animatedHours += endTimePlus24AnimationStep;
+    }
+    
+    // During animation, show AM/PM. After animation (step 12), show 24-hour format without AM/PM
+    if (endTimeAnimationStep < 12) {
+      return `${animatedHours}:${String(endMinutes).padStart(2, '0')} ${endTimeAMPM}`;
+    } else {
+      return `${animatedHours}:${String(endMinutes).padStart(2, '0')}`;
+    }
+  };
+
+  // Helper function to get end time after +12 hours animation (without +24 hours)
+  const getEndTimeAfter12Hours = () => {
+    const endHours = parseInt(endHoursInput) || 0;
+    const endMinutes = parseInt(endMinutesInput) || 0;
+    
+    let end24Hours = endHours;
+    if (endTimeAMPM === 'PM' && endHours !== 12) {
+      end24Hours = endHours + 12;
+    } else if (endTimeAMPM === 'AM' && endHours === 12) {
+      end24Hours = 0;
+    }
+    
+    // Don't add 24 more hours here - this is just after +12 hours animation
+    return `${end24Hours}:${String(endMinutes).padStart(2, '0')}`;
   };
 
   const handleClick = () => {
@@ -740,6 +1141,14 @@ const ElapsedTime = () => {
     return () => clearInterval(interval);
   }, [isMoving]);
 
+  // Clean up elapsed time fade-in animation
+  useEffect(() => {
+    if (isElapsedTimeFadingIn) {
+      const timeout = setTimeout(() => setIsElapsedTimeFadingIn(false), 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isElapsedTimeFadingIn]);
+
   const handleReset = () => {
     // Reset all states to initial values
     setShowButton(true);
@@ -814,6 +1223,26 @@ const ElapsedTime = () => {
     setStartTimeAnimationStep(0);
     setEndTimeAnimationStep(0);
     setIsInputsMovingLeft(false);
+    setIsStartTimeTextGrowing(false);
+    setIsEndTimeTextGrowing(false);
+    setIsStartTimePlus12Growing(false);
+    setIsEndTimePlus12Growing(false);
+    setIsStartTimePlus12MovingLeft(false);
+    setIsEndTimePlus12MovingLeft(false);
+    setBothTimesIn24HourFormat(false);
+    setShowEndTimePlus24(false);
+    setIsEndTimePlus24Growing(false);
+    setIsEndTimePlus24MovingLeft(false);
+    setEndTimePlus24AnimationStep(0);
+    setIsEndTimePlus24Animating(false);
+    setHas24TextFadedOut(false);
+    setShowEndTimeAfter12Hours(false);
+    setIsElapsedTimeFadingOut(false);
+    setShowElapsedTimeAnswer(false);
+    setIsElapsedTimeFadingIn(false);
+    setIsInputsReenabled(false);
+    setShowNewSolveButton(false);
+    setIsNewSolveButtonGrowing(false);
   };
 
   return (
@@ -1167,6 +1596,45 @@ const ElapsedTime = () => {
           .second-clock-fade-in {
             animation: secondClockFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
+          @keyframes fadeOutInput {
+            from {
+              opacity: 1;
+              transform: scale(1);
+            }
+            to {
+              opacity: 0;
+              transform: scale(0.8);
+            }
+          }
+          .fade-out-input {
+            animation: fadeOutInput 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes inputShrinkOut {
+            from {
+              opacity: 1;
+              transform: scale(1);
+            }
+            to {
+              opacity: 0;
+              transform: scale(0);
+            }
+          }
+          .input-shrink-out {
+            animation: inputShrinkOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes textGrowIn {
+            from {
+              opacity: 0;
+              transform: scale(0);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          .text-grow-in {
+            animation: textGrowIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
           @keyframes fadeInInput {
             from {
               opacity: 0;
@@ -1284,19 +1752,6 @@ const ElapsedTime = () => {
           .move-end-time-down {
             animation: moveEndTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
-          @keyframes fadeOutInput {
-            from {
-              opacity: 1;
-              transform: scale(1);
-            }
-            to {
-              opacity: 0;
-              transform: scale(0.8);
-            }
-          }
-          .fade-out-input {
-            animation: fadeOutInput 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          }
           @keyframes moveInputsLeft {
             0% {
             }
@@ -1306,6 +1761,41 @@ const ElapsedTime = () => {
           }
           .move-inputs-left {
             animation: moveInputsLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes plus12MoveLeft {
+            from {
+              transform: translateX(0);
+              opacity: 1;
+            }
+            to {
+              transform: translateX(-20px);
+              opacity: 0;
+            }
+          }
+          .plus12-move-left {
+            animation: plus12MoveLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveStartTimeDown {
+            from {
+              transform: translate(-195px, 0);
+            }
+            to {
+              transform: translate(-195px, 5px);
+            }
+          }
+          .move-start-time-down {
+            animation: moveStartTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes moveEndTimeDown {
+            from {
+              transform: translate(-195px, 0);
+            }
+            to {
+              transform: translate(-195px, 15px);
+            }
+          }
+          .move-end-time-down {
+            animation: moveEndTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
         `}
       </style>
@@ -1475,11 +1965,12 @@ const ElapsedTime = () => {
                                 startTime.hours = newTime.hours;
                                 startTime.minutes = newTime.minutes;
                               }, startMinutesInput, setStartTimeAMPM)}
-                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                               maxLength={2}
                               placeholder="HH"
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             />
-                            <span className={`text-blue-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                            <span className={`text-blue-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
                             <input
                               type="text"
                               value={startMinutesInput}
@@ -1493,9 +1984,10 @@ const ElapsedTime = () => {
                                 startTime.hours = newTime.hours;
                                 startTime.minutes = newTime.minutes;
                               }, startHoursInput)}
-                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                               maxLength={2}
                               placeholder="MM"
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             />
                             <button
                               onClick={() => toggleAMPM(startTimeAMPM, setStartTimeAMPM, startHoursInput, startMinutesInput, (newTime) => {
@@ -1503,7 +1995,8 @@ const ElapsedTime = () => {
                                 startTime.hours = newTime.hours;
                                 startTime.minutes = newTime.minutes;
                               })}
-                              className={`text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             >
                               {startTimeAMPM}
                             </button>
@@ -1513,30 +2006,34 @@ const ElapsedTime = () => {
                             <input
                               type="text"
                               value={startHoursInput}
-                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 input-shrink-out"
                               style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
                               maxLength={2}
                               readOnly
                             />
-                            <span className="text-blue-500 text-sm font-medium fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
+                            <span className="text-blue-500 text-sm font-medium input-shrink-out" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
                             <input
                               type="text"
                               value={startMinutesInput}
-                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              className="text-blue-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 input-shrink-out"
                               style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
                               maxLength={2}
                               readOnly
                             />
-                            <button className="text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
+                            <button className="text-blue-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center input-shrink-out" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
                               {startTimeAMPM}
                             </button>
                             {showStartTimeText && (
-                              <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${showStartTimeText ? 'fade-in-down' : 'opacity-0'}`}>
-                                {isStartTimeAnimating ? getStartTimeAnimated() : showStartTime24Hour ? getStartTime24Hour() : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
+                              <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${isStartTimeTextGrowing ? 'text-grow-in' : 'opacity-0'}`}>
+                                {showStartTime24Hour
+                                  ? getStartTime24Hour()
+                                  : isStartTimeAnimating
+                                    ? getStartTimeAnimated()
+                                    : `${startHoursInput}:${startMinutesInput.padStart(2, '0')} ${startTimeAMPM}`}
                               </span>
                             )}
                             {showStartTimePlus12 && (
-                              <span className="text-black font-bold text-xs ml-1 whitespace-nowrap fade-in-down">
+                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap ${isStartTimePlus12Growing ? 'text-grow-in' : isStartTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
                                 +12 hours
                               </span>
                             )}
@@ -1558,23 +2055,26 @@ const ElapsedTime = () => {
                               value={endHoursInput}
                               onChange={(e) => handleHourInputChange(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
                               onBlur={(e) => handleHourInputBlur(e.target.value, setEndHoursInput, setEndTime, endMinutesInput, setEndTimeAMPM)}
-                              className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                               maxLength={2}
                               placeholder="HH"
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             />
-                            <span className={`text-red-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
+                            <span className={`text-red-500 text-sm font-medium ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}>:</span>
                             <input
                               type="text"
                               value={endMinutesInput}
                               onChange={(e) => handleMinuteInputChange(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
                               onBlur={(e) => handleMinuteInputBlur(e.target.value, setEndMinutesInput, setEndTime, endHoursInput)}
-                              className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-8 text-center px-1 py-1 ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
                               maxLength={2}
                               placeholder="MM"
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             />
                             <button
                               onClick={() => toggleAMPM(endTimeAMPM, setEndTimeAMPM, endHoursInput, endMinutesInput, setEndTime)}
-                              className={`text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              className={`text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:border-gray-400 w-8 h-8 flex items-center justify-center ${isInputFadingIn ? 'fade-in-input' : isInputsReenabled ? 'fade-in-input' : 'opacity-0 scale-75'}`}
+                              disabled={!isInputsReenabled && !isInputFadingIn}
                             >
                               {endTimeAMPM}
                             </button>
@@ -1584,31 +2084,44 @@ const ElapsedTime = () => {
                             <input
                               type="text"
                               value={endHoursInput}
-                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 input-shrink-out"
                               style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
                               maxLength={2}
                               readOnly
                             />
-                            <span className="text-red-500 text-sm font-medium fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
+                            <span className="text-red-500 text-sm font-medium input-shrink-out" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>:</span>
                             <input
                               type="text"
                               value={endMinutesInput}
-                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 fade-out-input"
+                              className="text-red-500 text-sm font-medium bg-white border border-gray-300 rounded-md w-8 text-center px-1 py-1 input-shrink-out"
                               style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}
                               maxLength={2}
                               readOnly
                             />
-                            <button className="text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center fade-out-input" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
+                            <button className="text-red-500 text-xs font-medium bg-white border border-gray-300 rounded-md w-8 h-8 flex items-center justify-center input-shrink-out" style={{ display: isInputsAnimatingToText ? 'none' : 'block' }}>
                               {endTimeAMPM}
                             </button>
                             {showEndTimeText && (
-                              <span className="text-red-500 text-sm font-medium whitespace-nowrap fade-in-down">
-                                {isEndTimeAnimating ? getEndTimeAnimated() : showEndTime24Hour ? getEndTime24Hour() : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
+                              <span className={`text-red-500 text-sm font-medium whitespace-nowrap ${isEndTimeTextGrowing ? 'text-grow-in' : 'opacity-0'}`}>
+                                {(isEndTimePlus24Animating && endTimePlus24AnimationStep > 0)
+                                  ? getEndTimeWith24Hours()
+                                  : showEndTime24Hour
+                                    ? getEndTime24Hour()
+                                    : showEndTimeAfter12Hours
+                                      ? getEndTimeAfter12Hours()
+                                      : isEndTimeAnimating
+                                        ? getEndTimeAnimated()
+                                        : `${endHoursInput}:${endMinutesInput.padStart(2, '0')} ${endTimeAMPM}`}
                               </span>
                             )}
                             {showEndTimePlus12 && (
-                              <span className="text-black font-bold text-xs ml-1 whitespace-nowrap fade-in-down">
+                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap ${isEndTimePlus12Growing ? 'text-grow-in' : isEndTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
                                 +12 hours
+                              </span>
+                            )}
+                            {showEndTimePlus24 && (
+                              <span className={`text-black font-bold text-xs whitespace-nowrap ${isEndTimePlus24Growing ? 'text-grow-in' : isEndTimePlus24MovingLeft ? 'plus12-move-left' : 'opacity-0'}`} style={{ marginLeft: endTimeAMPM === 'PM' ? '-60px' : '5px' }}>
+                                +24 hours
                               </span>
                             )}
                           </>
@@ -1626,12 +2139,23 @@ const ElapsedTime = () => {
               )}
               {showElapsedTime && (
                 <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
-                  Elapsed Time: {isInputsDirty ? '?h ?m' : `${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
+                  <span>
+                    Elapsed Time: 
+                    {!showElapsedTimeAnswer ? (
+                      <span className={isElapsedTimeFadingOut ? 'fade-out-text' : ''}>
+                        {' ?h ?m'}
+                      </span>
+                    ) : (
+                      <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
+                        {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
+                      </span>
+                    )}
+                  </span>
                   {showSolveButton && (
                     <div className="glow-button simple-glow absolute left-[143px] top-[-6px]" style={{ bottom: 'auto', right: 'auto', padding: '5px' }}>
                       <button
                         onClick={handleSolve}
-                        className="bg-[#5750E3] text-white text-xs px-2 py-1 rounded hover:bg-[#4A45D1] transition-colors"
+                        className="bg-[#008545] text-white text-xs px-2 py-1 rounded hover:bg-[#00783E] transition-colors"
                       >
                         Solve
                       </button>
@@ -1643,7 +2167,7 @@ const ElapsedTime = () => {
           </div>
           
           {/* Text Section */}
-          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md p-4 min-h-[55px] relative">
+          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md p-4 h-[115px] relative flex items-center justify-center">
             {showText && (
               <div className={`text-sm text-gray-600 ${isContinueShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
@@ -1677,16 +2201,7 @@ const ElapsedTime = () => {
             )}
           </div>
         </div>
-      </div>
-      
-      {/* Temporary Skip to Input Button */}
-      <div className="w-[464px] mx-auto mt-4 flex justify-center">
-        <button
-          onClick={handleSkipToInput}
-          className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-md transition-colors font-medium"
-        >
-          Skip to Input (Temporary)
-        </button>
+        
       </div>
     </div>
   );
