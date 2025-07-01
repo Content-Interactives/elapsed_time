@@ -798,9 +798,10 @@ const ElapsedTime = () => {
     setHas24TextFadedOut(false);
     setShowEndTimeAfter12Hours(false);
     setIsElapsedTimeFadingOut(false);
-    // Don't reset the elapsed time answer - keep it visible
-    // setShowElapsedTimeAnswer(false);
+    // Reset the elapsed time answer and inputs dirty state immediately to prevent question marks
+    setShowElapsedTimeAnswer(false);
     setIsElapsedTimeFadingIn(false);
+    setIsInputsDirty(false);
     
     // Keep the left movement animations in their final state (true) so they don't retrigger
     // setIsUnderlineMovingLeft(false);
@@ -811,7 +812,6 @@ const ElapsedTime = () => {
     setTimeout(() => {
       // Re-enable inputs
       setIsInputsReenabled(true);
-      setIsInputsDirty(false);
     }, 800); // 800ms delay before inputs reappear
     
     // Don't automatically show solve button - only show when inputs are changed
@@ -1807,9 +1807,26 @@ const ElapsedTime = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[#5750E3] text-sm font-medium select-none">Elapsed Time Explorer</h2>
           <button 
-            className="text-gray-500 hover:text-gray-700 text-sm px-3 py-1 rounded border border-gray-300 hover:border-gray-400 transition-colors"
+            className={`text-sm px-3 py-1 rounded border transition-colors ${
+              (isButtonShrinking || isContinueShrinking || isSecondButtonShrinking || isFinalButtonShrinking || 
+               isSecondTextShrinking || isFinalTextShrinking || isMoving || isClockShrinking || 
+               isClockShrinkingFinal || isClockMovingUp || isTimeMovingUp || isInputsAnimatingToText || 
+               isStartTimeAnimating || isEndTimeAnimating || isEndTimePlus24Animating || isInputFadingIn || 
+               isTextFadingOut || isUnderlineMovingLeft || isElapsedTimeMovingLeft || isInputsMovingLeft) && 
+               !showContinue && !showSecondContinue && !showNewSolveButton && !showCompletionText && 
+               (!showFinalContinue || (showFinalContinue && (isFinalTextShrinking || isFinalButtonShrinking || isClockShrinkingFinal || isClockMovingUp || isInputFadingIn || isTextFadingOut || isUnderlineMovingLeft || isElapsedTimeMovingLeft || isInputsMovingLeft)))
+                ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'text-gray-500 hover:text-gray-700 border-gray-300 hover:border-gray-400'
+            }`}
             onClick={handleReset}
             title="Reset interactive"
+            disabled={(isButtonShrinking || isContinueShrinking || isSecondButtonShrinking || isFinalButtonShrinking || 
+                      isSecondTextShrinking || isFinalTextShrinking || isMoving || isClockShrinking || 
+                      isClockShrinkingFinal || isClockMovingUp || isTimeMovingUp || isInputsAnimatingToText || 
+                      isStartTimeAnimating || isEndTimeAnimating || isEndTimePlus24Animating || isInputFadingIn || 
+                      isTextFadingOut || isUnderlineMovingLeft || isElapsedTimeMovingLeft || isInputsMovingLeft) && 
+                      !showContinue && !showSecondContinue && !showNewSolveButton && !showCompletionText && 
+                      (!showFinalContinue || (showFinalContinue && (isFinalTextShrinking || isFinalButtonShrinking || isClockShrinkingFinal || isClockMovingUp || isInputFadingIn || isTextFadingOut || isUnderlineMovingLeft || isElapsedTimeMovingLeft || isInputsMovingLeft)))}
           >
             Reset
           </button>
@@ -2145,11 +2162,18 @@ const ElapsedTime = () => {
                 <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
                   <span>
                     Elapsed Time: 
-                    {!showElapsedTimeAnswer ? (
+                    {!showInputs ? (
+                      // Show calculated answer when elapsed time first appears (before inputs)
+                      <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
+                        {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
+                      </span>
+                    ) : isInputsDirty && !showElapsedTimeAnswer ? (
+                      // Show question marks only when inputs are dirty (changed by user) and answer is not shown
                       <span className={isElapsedTimeFadingOut ? 'fade-out-text' : ''}>
                         {' ?h ?m'}
                       </span>
                     ) : (
+                      // Show calculated answer when inputs are not dirty or after solve animation
                       <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
                         {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
                       </span>
