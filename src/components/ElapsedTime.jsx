@@ -193,6 +193,7 @@ const ElapsedTime = () => {
   const [showNewSolveButton, setShowNewSolveButton] = useState(false);
   const [isInputsReenabled, setIsInputsReenabled] = useState(false);
   const [isNewSolveButtonGrowing, setIsNewSolveButtonGrowing] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
 
 
   // Function to format time input for display
@@ -990,6 +991,8 @@ const ElapsedTime = () => {
 
   const handleClick = () => {
     setIsButtonShrinking(true);
+    // Hide welcome message when button is clicked
+    setShowWelcomeMessage(false);
     // Trigger initial button press animation
     setIsButtonPressed(true);
     setTimeout(() => {
@@ -1243,6 +1246,7 @@ const ElapsedTime = () => {
     setIsInputsReenabled(false);
     setShowNewSolveButton(false);
     setIsNewSolveButtonGrowing(false);
+    setShowWelcomeMessage(true);
   };
 
   return (
@@ -2168,6 +2172,13 @@ const ElapsedTime = () => {
           
           {/* Text Section */}
           <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md p-4 h-[115px] relative flex items-center justify-center">
+            {showWelcomeMessage && (
+              <div className="text-sm text-gray-600 fade-in-down text-center">
+                <div>
+                  Welcome to the Elapsed Time Explorer! Click the button above to begin.
+                </div>
+              </div>
+            )}
             {showText && (
               <div className={`text-sm text-gray-600 ${isContinueShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
