@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
-const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'normal' }) => {
+const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'normal', showPieSlice = false, pieSliceAnimation = 'grow' }) => {
   // Calculate total minutes for continuous rotation
   const totalMinutes = hours * 60 + minutes;
   const hourRotation = (totalMinutes / 60) * 30; // 30 degrees per hour
   const minuteRotation = totalMinutes * 6; // 6 degrees per minute
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const displayHours = hours % 12 || 12;
+
+  // Calculate elapsed time for pie slice (from 12:30 PM to 1:05 PM = 35 minutes)
+  const elapsedMinutes = 35; // 35 minutes elapsed
+  const pieSliceAngle = (elapsedMinutes / 60) * 360; // Convert to degrees
+  
+  // Calculate start and end angles for the pie slice
+  // Since SVG is rotated -90 degrees, we need to adjust angles
+  // 12:30 PM is at 90 degrees (3 o'clock position), 1:05 PM is at 300 degrees (10 o'clock position)
+  const startAngle = 180; // 12:30 PM position (3 o'clock after rotation)
+  const endAngle = 30; // 1:05 PM position (10 o'clock after rotation)
+  const sweepFlag = 1; // Clockwise sweep
 
   // Size configurations
   const sizes = {
@@ -43,6 +54,34 @@ const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'no
         transition: 'border-color 0.1s ease-in-out 0.2s' 
       }}>
         <div className={`${config.inner} rounded-full flex items-center justify-center relative`} style={{ backgroundColor: `${color}10`, transition: 'background-color 0.1s ease-in-out 0.2s' }}>
+          {/* Pie slice: radius set to 58.5 to avoid SVG clipping and match the clock border */}
+          {showPieSlice && (
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 120 120"
+              style={{ transform: 'rotate(-90deg)' }} // Start from top (12 o'clock position)
+            >
+              <defs>
+                <linearGradient id="pieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#5750E3" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#5750E3" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+              <path
+                d={`M 60 60 L ${60 + 58.5 * Math.cos(startAngle * Math.PI / 180)} ${60 + 58.5 * Math.sin(startAngle * Math.PI / 180)} A 58.5 58.5 0 1 1 ${60 + 58.5 * Math.cos(endAngle * Math.PI / 180)} ${60 + 58.5 * Math.sin(endAngle * Math.PI / 180)} Z`}
+                fill="url(#pieGradient)"
+                style={{
+                  animation: pieSliceAnimation === 'shrink'
+                    ? 'pieSliceShrink 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+                    : 'pieSliceGrow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                  opacity: 0,
+                  transform: 'scale(0)',
+                  transformOrigin: '60px 60px'
+                }}
+              />
+            </svg>
+          )}
+          
           {/* Clock numbers */}
           {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => {
             const angle = (num * 30) - 90; // -90 to start at top
@@ -194,7 +233,16 @@ const ElapsedTime = () => {
   const [isInputsReenabled, setIsInputsReenabled] = useState(false);
   const [isNewSolveButtonGrowing, setIsNewSolveButtonGrowing] = useState(false);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
+  const [showPieSlice, setShowPieSlice] = useState(false);
+  // Add state for pie slice animation
+  const [pieSliceAnimation, setPieSliceAnimation] = useState('grow');
 
+  // Shrink out the pie slice when the clock shrinks
+  useEffect(() => {
+    if (isClockShrinkingFinal) {
+      setPieSliceAnimation('shrink');
+    }
+  }, [isClockShrinkingFinal]);
 
   // Function to format time input for display
   const formatTimeInput = (input) => {
@@ -1124,6 +1172,8 @@ const ElapsedTime = () => {
           setIsMoving(false); // Stop the clock
           setHasReachedTarget(true); // Mark that we've reached the target time
           clearInterval(interval);
+          // Show pie slice overlay to visualize elapsed time
+          setShowPieSlice(true);
           // Trigger final button press animation
           setIsButtonPressed(true);
           setTimeout(() => {
@@ -1247,6 +1297,7 @@ const ElapsedTime = () => {
     setShowNewSolveButton(false);
     setIsNewSolveButtonGrowing(false);
     setShowWelcomeMessage(true);
+    setShowPieSlice(false);
   };
 
   return (
@@ -1576,6 +1627,26 @@ const ElapsedTime = () => {
           .clock-shrink-final {
             animation: clockShrinkFinal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
+          @keyframes pieSliceGrow {
+            from {
+              opacity: 0;
+              transform: scale(0);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          @keyframes pieSliceShrink {
+            from {
+              opacity: 1;
+              transform: scale(1);
+            }
+            to {
+              opacity: 0;
+              transform: scale(0);
+            }
+          }
           @keyframes clockMoveUp {
             from {
               transform: translate(0, 0);
@@ -1840,10 +1911,12 @@ const ElapsedTime = () => {
                 {showClock && (
                   <div className={`${isClockShrinking ? 'clock-shrink' : isClockShrinkingFinal ? 'clock-shrink-final' : 'clock-grow-in'}`}>
                     <Clock 
-                      hours={clocksColored ? parseInt(startHoursInput) || 12 : (isClockMovingUp ? startTime.hours : (hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours)))} 
-                      minutes={clocksColored ? parseInt(startMinutesInput) || 0 : (isClockMovingUp ? startTime.minutes : (hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes)))} 
+                      hours={clocksColored ? parseInt(endHoursInput) || 12 : (isClockMovingUp ? startTime.hours : (hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours)))} 
+                      minutes={clocksColored ? parseInt(endMinutesInput) || 0 : (isClockMovingUp ? startTime.minutes : (hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes)))} 
                       isMoving={isButtonPressed} 
-                      color={clocksColored ? '#3B82F6' : '#5750E3'}
+                      color={clocksColored ? '#EF4444' : '#5750E3'}
+                      showPieSlice={showPieSlice}
+                      pieSliceAnimation={pieSliceAnimation}
                     />
                   </div>
                 )}
@@ -1851,10 +1924,10 @@ const ElapsedTime = () => {
               {showSecondClock && (
                 <div className="absolute left-[4%] top-[8%] second-clock-fade-in">
                   <Clock 
-                    hours={clocksColored ? parseInt(endHoursInput) || 12 : 13} 
-                    minutes={clocksColored ? parseInt(endMinutesInput) || 0 : 5} 
+                    hours={clocksColored ? parseInt(startHoursInput) || 12 : 13} 
+                    minutes={clocksColored ? parseInt(startMinutesInput) || 0 : 5} 
                     isMoving={false} 
-                    color={clocksColored ? '#EF4444' : '#5750E3'}
+                    color={clocksColored ? '#3B82F6' : '#5750E3'}
                     size="small"
                   />
                 </div>
@@ -2222,7 +2295,7 @@ const ElapsedTime = () => {
             {showFinalText && (
               <div className={`text-sm text-gray-600 ${isFinalTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
                 <div>
-                  Now we can subtract the <span className="text-blue-500">start time</span> from the <span className="text-red-500">end time</span> to find the <span className="font-bold text-black">elapsed time</span>. If the result was a negative number, that means the elapsed time crosses midnight, so add 24 hours to the result.
+                  Now we can take the <span className="text-red-500">end time</span> and subtract the <span className="text-blue-500">start time</span> from it to find the <span className="font-bold text-black">elapsed time</span>. If the result is a negative number, add 24 hours to the result.
                 </div>
               </div>
             )}
