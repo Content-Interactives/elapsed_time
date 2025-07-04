@@ -2080,7 +2080,7 @@ const ElapsedTime = () => {
               )}
               {/* Phase 1: Initial demo times (12:30 PM and 1:05 PM) */}
               {showEndTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[108px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[98px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2095,7 +2095,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {showStartTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[83px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[73px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
