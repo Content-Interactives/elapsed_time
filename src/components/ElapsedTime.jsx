@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import FlexiWave from '../assets/All Flexi Poses/PNG/Flexi_Wave.png';
+import FlexiTelescope from '../assets/All Flexi Poses/PNG/Flexi_Telescope.png';
+import FlexiWoah from '../assets/All Flexi Poses/PNG/Flexi_Woah.png';
+import FlexiStars from '../assets/All Flexi Poses/PNG/Flexi_Stars.png';
+import FlexiTeacher from '../assets/All Flexi Poses/PNG/Flexi_Teacher.png';
+import FlexiPoint from '../assets/All Flexi Poses/PNG/Flexi_Point.png';
+import FlexiThumbsUp from '../assets/All Flexi Poses/PNG/Flexi_ThumbsUp.png';
 
 const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'normal', showPieSlice = false, pieSliceAnimation = 'grow' }) => {
   // Calculate total minutes for continuous rotation
@@ -32,15 +39,15 @@ const Clock = ({ hours, minutes, isMoving = false, color = '#5750E3', size = 'no
       radius: 50
     },
     small: {
-      outer: 'w-[105px] h-[105px]',
-      inner: 'w-[90px] h-[90px]',
+      outer: 'w-[90px] h-[90px]',
+      inner: 'w-[75px] h-[75px]',
       border: 'border-2',
       borderWidth: '3px',
       numbers: 'text-xs',
-      hourHand: 'w-[1px] h-[30px]',
-      minuteHand: 'w-[1px] h-9',
-      centerDot: 'w-2 h-2',
-      radius: 37.5
+      hourHand: 'w-[1px] h-[25px]',
+      minuteHand: 'w-[1px] h-7',
+      centerDot: 'w-1.5 h-1.5',
+      radius: 30
     }
   };
 
@@ -236,6 +243,10 @@ const ElapsedTime = () => {
   const [showPieSlice, setShowPieSlice] = useState(false);
   // Add state for pie slice animation
   const [pieSliceAnimation, setPieSliceAnimation] = useState('grow');
+  // Add state for telescope loading
+  const [telescopeLoaded, setTelescopeLoaded] = useState(false);
+  // Add state for welcome message fade out
+  const [isWelcomeFadingOut, setIsWelcomeFadingOut] = useState(false);
 
   // Shrink out the pie slice when the clock shrinks
   useEffect(() => {
@@ -1040,7 +1051,10 @@ const ElapsedTime = () => {
   const handleClick = () => {
     setIsButtonShrinking(true);
     // Hide welcome message when button is clicked
-    setShowWelcomeMessage(false);
+    setIsWelcomeFadingOut(true);
+    setTimeout(() => {
+      setShowWelcomeMessage(false);
+    }, 350); // Match the fade out animation duration
     // Trigger initial button press animation
     setIsButtonPressed(true);
     setTimeout(() => {
@@ -1104,10 +1118,10 @@ const ElapsedTime = () => {
       setIsClockShrinkingFinal(true);
       setTimeout(() => {
         setIsClockMovingUp(true);
+        setClocksColored(true);
         setTimeout(() => {
           setShowSecondClock(true);
           setTimeout(() => {
-            setClocksColored(true);
             // Trigger input animation first
             setIsInputFadingIn(true);
             // Trigger left movement animations for equation elements
@@ -1298,6 +1312,9 @@ const ElapsedTime = () => {
     setIsNewSolveButtonGrowing(false);
     setShowWelcomeMessage(true);
     setShowPieSlice(false);
+    setPieSliceAnimation('grow');
+    setTelescopeLoaded(false);
+    setIsWelcomeFadingOut(false);
   };
 
   return (
@@ -1417,7 +1434,7 @@ const ElapsedTime = () => {
             animation: moveEndTimeToTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
           .clock-shrink {
-            animation: shrinkButton 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: shrinkButton 1.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
           }
           .arrow-fade-in {
             animation: fadeInArrow 0.5s ease-out forwards;
@@ -1556,17 +1573,21 @@ const ElapsedTime = () => {
             transform-origin: left;
           }
           @keyframes clockGrowIn {
-            from {
+            0% {
               transform: scale(0.6);
               opacity: 0;
             }
-            to {
+            70% {
+              transform: scale(1.1);
+              opacity: 1;
+            }
+            100% {
               transform: scale(1);
               opacity: 1;
             }
           }
           .clock-grow-in {
-            animation: clockGrowIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: clockGrowIn 0.8s cubic-bezier(0.4, 0.2, 0.2, 1) forwards;
           }
           @keyframes shiftRight {
             from {
@@ -1616,17 +1637,6 @@ const ElapsedTime = () => {
           .rise-up {
             animation: riseUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
-          @keyframes clockShrinkFinal {
-            from {
-              transform: scale(1);
-            }
-            to {
-              transform: scale(0.75);
-            }
-          }
-          .clock-shrink-final {
-            animation: clockShrinkFinal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          }
           @keyframes pieSliceGrow {
             from {
               opacity: 0;
@@ -1652,11 +1662,11 @@ const ElapsedTime = () => {
               transform: translate(0, 0);
             }
             to {
-              transform: translate(-32px, 60px);
+              transform: translate(0px, 100px);
             }
           }
           .clock-move-up {
-            animation: clockMoveUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: clockMoveUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           }
           @keyframes secondClockFadeIn {
             from {
@@ -1872,6 +1882,98 @@ const ElapsedTime = () => {
           .move-end-time-down {
             animation: moveEndTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
+          
+          /* Speech Bubble Styles */
+          .flexi-wave-bottom-left {
+            position: absolute;
+            left: 18px;
+            bottom: 18px;
+            width: 70px;
+            height: auto;
+            z-index: 2;
+            pointer-events: none;
+          }
+          
+          .flexi-wave-bubble-container {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            align-items: flex-end;
+            z-index: 3;
+          }
+          
+          .speech-bubble {
+            position: relative;
+            margin-left: 100px;
+            margin-bottom: 70px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 7px 13px;
+            font-size: 0.95rem;
+            color: #222;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 200px;
+            max-width: 280px;
+          }
+          
+          .speech-bubble:after {
+            content: '';
+            position: absolute;
+            left: -18px;
+            bottom: 16px;
+            width: 0;
+            height: 0;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-right: 18px solid #fff;
+            filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.08));
+          }
+          
+          .flexi-telescope-fade-in {
+            animation: flexiFadeIn 0.6s ease-in-out;
+          }
+          
+          .speech-bubble-fade-in {
+            animation: speechBubbleFadeIn 0.5s ease-in-out 0.2s both;
+          }
+          
+          @keyframes flexiFadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          @keyframes speechBubbleFadeIn {
+            from {
+              opacity: 0;
+              transform: translateX(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          
+          .flexi-first-step-fade-out {
+            animation: flexiFirstStepFadeOut 0.2s cubic-bezier(0.4, 0.2, 0.2, 1) forwards;
+          }
+          
+          @keyframes flexiFirstStepFadeOut {
+            from {
+              opacity: 1;
+              transform: translateY(0);
+            }
+            to {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+          }
         `}
       </style>
       <div className="p-4">
@@ -1903,13 +2005,12 @@ const ElapsedTime = () => {
           </button>
         </div>
 
-        <div className="space-y-4">
           {/* Visual Section */}
-          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden">
-            <div className="relative w-[400px] h-[260px] bg-white">
-              <div className={`absolute left-[8%] top-[25%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
+          <div className="w-[430px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden relative" style={{ minHeight: '370px', height: 'auto' }}>
+            <div className="relative w-[400px]" style={{ minHeight: '380px', height: 'auto' }}>
+              <div className={`absolute left-[8%] top-[6%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
                 {showClock && (
-                  <div className={`${isClockShrinking ? 'clock-shrink' : isClockShrinkingFinal ? 'clock-shrink-final' : 'clock-grow-in'}`}>
+                  <div className={`${isClockShrinking ? 'clock-shrink' : 'clock-grow-in'}`}>
                     <Clock 
                       hours={clocksColored ? parseInt(endHoursInput) || 12 : (isClockMovingUp ? startTime.hours : (hasReachedTarget ? endTime.hours : (isMoving ? endTime.hours : startTime.hours)))} 
                       minutes={clocksColored ? parseInt(endMinutesInput) || 0 : (isClockMovingUp ? startTime.minutes : (hasReachedTarget ? endTime.minutes : (isMoving ? endTime.minutes : startTime.minutes)))} 
@@ -1917,12 +2018,13 @@ const ElapsedTime = () => {
                       color={clocksColored ? '#EF4444' : '#5750E3'}
                       showPieSlice={showPieSlice}
                       pieSliceAnimation={pieSliceAnimation}
+                      size={clocksColored ? 'small' : 'normal'}
                     />
                   </div>
                 )}
               </div>
               {showSecondClock && (
-                <div className="absolute left-[4%] top-[8%] second-clock-fade-in">
+                <div className="absolute left-[8%] top-[6%] second-clock-fade-in">
                   <Clock 
                     hours={clocksColored ? parseInt(startHoursInput) || 12 : 13} 
                     minutes={clocksColored ? parseInt(startMinutesInput) || 0 : 5} 
@@ -1978,7 +2080,7 @@ const ElapsedTime = () => {
               )}
               {/* Phase 1: Initial demo times (12:30 PM and 1:05 PM) */}
               {showEndTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[148px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[108px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -1993,7 +2095,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {showStartTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[123px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[83px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2005,7 +2107,7 @@ const ElapsedTime = () => {
 
               {/* Phase 2: 24-hour conversion times (12:30 and 13:05) */}
               {isTimeMovingUp && show24HourTimes && !clocksColored && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[143px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[103px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2015,7 +2117,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && show24HourTimes && !clocksColored && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[168px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[128px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'}`}>
                   <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2027,7 +2129,7 @@ const ElapsedTime = () => {
 
               {/* Arrow element */}
               {isTimeMovingUp && showArrows && showArrow && (
-                <div className={`absolute left-[205px] top-[168px] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-[205px] top-[128px] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="ml-12">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#5750E3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -2040,7 +2142,7 @@ const ElapsedTime = () => {
               {clocksColored && showInputs && (
                 <>
                   {/* Interactive Start Time Input */}
-                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[112px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-start-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[72px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-start-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
                     <div className="flex items-center gap-2 w-full">
                       <span className="text-blue-500 text-sm font-medium whitespace-nowrap">Start Time:</span>
                       <div className="flex items-center gap-1 flex-nowrap">
@@ -2138,7 +2240,7 @@ const ElapsedTime = () => {
                   </div>
 
                   {/* Interactive End Time Input */}
-                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[77px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-end-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[37px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-end-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
                     <div className={`flex items-center gap-2 w-full ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
                       <span className="text-red-500 text-sm font-medium whitespace-nowrap">End Time:</span>
                       <div className="flex items-center gap-1 flex-nowrap">
@@ -2227,12 +2329,12 @@ const ElapsedTime = () => {
               )}
               {showUnderline && (
                 <>
-                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[148px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '200px' : '150px' }} />
-                  <div className={`absolute left-[185px] top-[128px] w-[8px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
+                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[108px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '200px' : '150px' }} />
+                  <div className={`absolute left-[185px] top-[88px] w-[8px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
                 </>
               )}
               {showElapsedTime && (
-                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[160px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
+                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[120px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
                   <span>
                     Elapsed Time: 
                     {!showInputs ? (
@@ -2264,51 +2366,56 @@ const ElapsedTime = () => {
                   )}
                 </div>
               )}
+              
+              {/* Flexi Speech Bubble Section - Now inside the container */}
+              {(showWelcomeMessage || showText || showExplanation || showFinalText || showCompletionText) && (
+                <div className="absolute left-0 bottom-0 w-full h-full flex items-end justify-start pointer-events-none">
+                  {showWelcomeMessage && (
+                    <div className={`flexi-wave-bubble-container ${isWelcomeFadingOut ? 'flexi-first-step-fade-out' : ''}`}>
+                      <img src={FlexiWave} alt="Flexi Wave" className="flexi-wave-bottom-left" />
+                      <div className={`speech-bubble ${isWelcomeFadingOut ? 'flexi-first-step-fade-out' : 'speech-bubble-fade-in'}`}>
+                        Welcome to the Elapsed Time Explorer! Click the button below to begin.
+                      </div>
+                    </div>
+                  )}
+                  {showText && (
+                    <div className={`flexi-wave-bubble-container ${isContinueShrinking ? 'flexi-first-step-fade-out' : ''}`}> 
+                      <img src={FlexiTeacher} alt="Flexi Teacher" className="flexi-wave-bottom-left flexi-telescope-fade-in" />
+                      <div className={`speech-bubble ${isContinueShrinking ? 'flexi-first-step-fade-out' : 'speech-bubble-fade-in'}`}> 
+                        <span className="font-bold text-black">Elapsed time</span> is the amount of time that passes between the <span className="text-blue-500">start</span> and <span className="text-red-500">end</span> of an event.
+                      </div>
+                    </div>
+                  )}
+                  {showExplanation && (
+                    <div className={`flexi-wave-bubble-container ${isSecondTextShrinking ? 'flexi-first-step-fade-out' : ''}`}> 
+                      <img src={FlexiTelescope} alt="Flexi Telescope" className="flexi-wave-bottom-left flexi-telescope-fade-in" onLoad={() => setTelescopeLoaded(true)} />
+                      {telescopeLoaded && (
+                        <div className={`speech-bubble ${isSecondTextShrinking ? 'flexi-first-step-fade-out' : 'speech-bubble-fade-in'}`}> 
+                          To find <span className="font-bold text-black">elapsed time</span>, first convert both times into a 24 hour format by adding 12 hours to all pm times past 12pm.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {showFinalText && (
+                    <div className={`flexi-wave-bubble-container ${isFinalTextShrinking ? 'flexi-first-step-fade-out' : ''}`}> 
+                      <img src={FlexiPoint} alt="Flexi Point" className="flexi-wave-bottom-left flexi-telescope-fade-in" />
+                      <div className={`speech-bubble ${isFinalTextShrinking ? 'flexi-first-step-fade-out' : 'speech-bubble-fade-in'}`}> 
+                        Now we can take the <span className="text-red-500">end time</span> and subtract the <span className="text-blue-500">start time</span> from it to find the <span className="font-bold text-black">elapsed time</span>. If the result is a negative number, add 24 hours to the result.
+                      </div>
+                    </div>
+                  )}
+                  {showCompletionText && (
+                    <div className="flexi-wave-bubble-container">
+                      <img src={FlexiThumbsUp} alt="Flexi Thumbs Up" className="flexi-wave-bottom-left flexi-telescope-fade-in" />
+                      <div className="speech-bubble speech-bubble-fade-in">
+                        Enter your own times and find their <span className="font-bold text-black">elapsed time!</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          
-          {/* Text Section */}
-          <div className="w-[400px] mx-auto bg-white border border-[#5750E3]/30 rounded-md p-4 h-[115px] relative flex items-center justify-center">
-            {showWelcomeMessage && (
-              <div className="text-sm text-gray-600 fade-in-down text-center">
-                <div>
-                  Welcome to the Elapsed Time Explorer! Click the button above to begin.
-                </div>
-              </div>
-            )}
-            {showText && (
-              <div className={`text-sm text-gray-600 ${isContinueShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
-                <div>
-                  <span className="font-bold text-black">Elapsed time</span> is the amount of time that passes between the <span className="text-blue-500">start</span> and <span className="text-red-500">end</span> of an event.
-                </div>
-              </div>
-            )}
-            
-            {showExplanation && (
-              <div className={`text-sm text-gray-600 ${isSecondTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
-                <div>
-                  To find <span className="font-bold text-black">elapsed time</span>, first convert both times into a 24 hour format by adding 12 hours to all pm times past 12pm.  
-                </div>
-              </div>
-            )}
-
-            {showFinalText && (
-              <div className={`text-sm text-gray-600 ${isFinalTextShrinking ? 'text-shrink' : 'fade-in-down'} text-center`}>
-                <div>
-                  Now we can take the <span className="text-red-500">end time</span> and subtract the <span className="text-blue-500">start time</span> from it to find the <span className="font-bold text-black">elapsed time</span>. If the result is a negative number, add 24 hours to the result.
-                </div>
-              </div>
-            )}
-
-            {showCompletionText && (
-              <div className="text-sm text-gray-600 fade-in-down text-center">
-                <div>
-                  Enter your own times and find their <span className="font-bold text-black">elapsed time!</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
