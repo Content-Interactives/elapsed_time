@@ -1469,7 +1469,7 @@ const ElapsedTime = () => {
           .glow-button { 
             position: absolute;
             bottom: 0.5rem;
-            right: 0.8rem;
+            right: -1.2rem;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
