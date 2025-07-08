@@ -2119,7 +2119,7 @@ const ElapsedTime = () => {
                       {`${endTime.hours % 12 || 12}:${String(endTime.minutes).padStart(2, '0')} ${endTime.hours >= 12 ? 'PM' : 'AM'}`}
                     </span>
                     {showSecondExplanation && (
-                      <span className={`text-black font-bold text-xs -ml-0.5 grow-in ${isTextFadingOut ? 'shrink-out-vertical' : ''}`}>
+                      <span className={`text-black font-bold text-xs -ml-0.5 grow-in hide-plus12-mobile ${isTextFadingOut ? 'shrink-out-vertical' : ''}`}>
                         +12 hours
                       </span>
                     )}
