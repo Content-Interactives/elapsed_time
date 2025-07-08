@@ -1318,7 +1318,7 @@ const ElapsedTime = () => {
   };
 
   return (
-    <div className="w-[464px] mx-auto mt-5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05)] bg-white rounded-lg select-none">
+    <div className="w-full max-w-[464px] mx-auto mt-5 px-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05)] bg-white rounded-lg select-none">
       <style>
         {`
           @keyframes shrinkButton {
@@ -1469,7 +1469,7 @@ const ElapsedTime = () => {
           .glow-button { 
             position: absolute;
             bottom: 0.5rem;
-            right: -1.2rem;
+            right: 0.1rem;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -1478,6 +1478,12 @@ const ElapsedTime = () => {
             z-index: 1;
             transition: all .3s ease;
             padding: 7px;
+          }
+          @media (max-width: 640px) {
+            .glow-button {
+              right: 0.5rem;
+              bottom: 0.5rem;
+            }
           }
           .glow-button::before {
             content: "";
@@ -1718,7 +1724,7 @@ const ElapsedTime = () => {
             }
           }
           .text-grow-in {
-            animation: textGrowIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: textGrowIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           }
           @keyframes fadeInInput {
             from {
@@ -1776,7 +1782,7 @@ const ElapsedTime = () => {
               transform: translateY(-25px);
             }
             100% {
-              transform: translate(-50px, -25px);
+              transform: translate(-3.5rem, -1.5rem);
             }
           }
           .move-start-time-left {
@@ -1787,7 +1793,7 @@ const ElapsedTime = () => {
               transform: translateY(-90px);
             }
             100% {
-              transform: translate(-50px, -90px);
+              transform: translate(-3.5rem, -5.5rem);
             }
           }
           .move-end-time-left {
@@ -1798,7 +1804,7 @@ const ElapsedTime = () => {
               transform: scaleX(1);
             }
             100% {
-              transform: translateX(-50px) scaleX(1);
+              transform: translateX(-3.5rem) scaleX(1);
             }
           }
           .move-underline-left {
@@ -1809,7 +1815,7 @@ const ElapsedTime = () => {
               transform: translate(1px, 0px);
             }
             100% {
-              transform: translate(-49px, 0px);
+              transform: translate(-3.5rem, 0px);
             }
           }
           .move-elapsed-time-left {
@@ -1817,31 +1823,31 @@ const ElapsedTime = () => {
           }
           @keyframes moveStartTimeDown {
             0% {
-              transform: translate(-50px, -30px);
+              transform: translate(-3.5rem, -1.875rem);
             }
             100% {
-              transform: translate(-50px, -25px);
+              transform: translate(-3.5rem, -1.5rem);
             }
           }
           .move-start-time-down {
-            animation: moveStartTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: moveStartTimeDown 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           }
           @keyframes moveEndTimeDown {
             0% {
-              transform: translate(-50px, -90px);
+              transform: translate(-3.5rem, -5.5rem);
             }
             100% {
-              transform: translate(-50px, -82px);
+              transform: translate(-.5rem, -5rem);
             }
           }
           .move-end-time-down {
-            animation: moveEndTimeDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: moveEndTimeDown 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           }
           @keyframes moveInputsLeft {
             0% {
             }
             100% {
-              transform: translateX(-195px);
+              transform: translateX(-3.5rem);
             }
           }
           .move-inputs-left {
@@ -1858,14 +1864,14 @@ const ElapsedTime = () => {
             }
           }
           .plus12-move-left {
-            animation: plus12MoveLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: plus12MoveLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           }
           @keyframes moveStartTimeDown {
             from {
-              transform: translate(-195px, 0);
+              transform: translate(-6rem, 0);
             }
             to {
-              transform: translate(-195px, 5px);
+              transform: translate(-6rem, 0.3rem);
             }
           }
           .move-start-time-down {
@@ -1873,10 +1879,10 @@ const ElapsedTime = () => {
           }
           @keyframes moveEndTimeDown {
             from {
-              transform: translate(-195px, 0);
+              transform: translate(-6rem, 0);
             }
             to {
-              transform: translate(-195px, 15px);
+              transform: translate(-6rem, 0.9rem);
             }
           }
           .move-end-time-down {
@@ -1886,9 +1892,12 @@ const ElapsedTime = () => {
           /* Speech Bubble Styles */
           .flexi-wave-bottom-left {
             position: absolute;
-            left: 18px;
+            left: 0.4rem;
             bottom: 18px;
             width: 70px;
+            max-width: 70px;
+            min-width: 40px;
+            width: 5rem;
             height: auto;
             z-index: 2;
             pointer-events: none;
@@ -1905,7 +1914,8 @@ const ElapsedTime = () => {
           
           .speech-bubble {
             position: relative;
-            margin-left: 100px;
+            margin-left: 5rem;
+            margin-right: 1rem;
             margin-bottom: 70px;
             background: #fff;
             border-radius: 18px;
@@ -1913,8 +1923,9 @@ const ElapsedTime = () => {
             font-size: 0.95rem;
             color: #222;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            min-width: 200px;
-            max-width: 280px;
+            min-width: 160px;
+            max-width: 90vw;
+            word-break: break-word;
           }
           
           .speech-bubble:after {
@@ -1974,6 +1985,27 @@ const ElapsedTime = () => {
               transform: translateY(-10px);
             }
           }
+          @media (max-width: 640px) {
+            .clock-container {
+              left: 35% !important;
+            }
+          }
+          @keyframes moveTextRight {
+            from {
+              transform: translateX(2.5rem);
+            }
+            to {
+              transform: translateX(2.5rem);
+            }
+          }
+          .move-text-right {
+            animation: moveTextRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+          }
+          @media (max-width: 419px) {
+            .hide-plus12-mobile {
+              display: none !important;
+            }
+          }
         `}
       </style>
       <div className="p-4">
@@ -2006,9 +2038,9 @@ const ElapsedTime = () => {
         </div>
 
           {/* Visual Section */}
-          <div className="w-[430px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden relative" style={{ minHeight: '370px', height: 'auto' }}>
-            <div className="relative w-[400px]" style={{ minHeight: '380px', height: 'auto' }}>
-              <div className={`absolute left-[8%] top-[6%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
+          <div className="w-full max-w-[430px] mx-auto bg-white border border-[#5750E3]/30 rounded-md overflow-hidden relative" style={{ minHeight: '370px', height: 'auto' }}>
+            <div className="relative w-full max-w-[400px] mx-auto" style={{ minHeight: '420px', height: 'auto' }}>
+              <div className={`absolute left-[1rem] top-[6%] ${isClockMovingUp ? 'clock-move-up' : ''}`}>
                 {showClock && (
                   <div className={`${isClockShrinking ? 'clock-shrink' : 'clock-grow-in'}`}>
                     <Clock 
@@ -2024,7 +2056,7 @@ const ElapsedTime = () => {
                 )}
               </div>
               {showSecondClock && (
-                <div className="absolute left-[8%] top-[6%] second-clock-fade-in">
+                <div className="absolute left-[1rem] top-[6%] second-clock-fade-in">
                   <Clock 
                     hours={clocksColored ? parseInt(startHoursInput) || 12 : 13} 
                     minutes={clocksColored ? parseInt(startMinutesInput) || 0 : 5} 
@@ -2080,7 +2112,7 @@ const ElapsedTime = () => {
               )}
               {/* Phase 1: Initial demo times (12:30 PM and 1:05 PM) */}
               {showEndTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[98px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-[11rem] top-[98px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-red-500 text-sm font-medium">End Time:</span>
                     <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2095,7 +2127,7 @@ const ElapsedTime = () => {
                 </div>
               )}
               {showStartTime && showFirstTimes && !clocksColored && (
-                <div className={`absolute left-1/2 transform -translate-x-1/8 top-[73px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-[11rem] top-[73px] flex flex-col items-center gap-2 ${isTimeMovingUp ? 'move-to-top' : 'grow-in'} ${isFirstTimesShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="flex items-center gap-2">
                     <span className="text-blue-500 text-sm font-medium">Start Time:</span>
                     <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
@@ -2107,9 +2139,9 @@ const ElapsedTime = () => {
 
               {/* Phase 2: 24-hour conversion times (12:30 and 13:05) */}
               {isTimeMovingUp && show24HourTimes && !clocksColored && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[103px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[11rem] top-[103px] flex flex-col items-center gap-2 ${isStartTimeRising ? 'move-start-time-to-top' : 'text-animation'}`}>
                   <div className="flex items-center gap-2">
-                    <span className="text-blue-500 text-sm font-medium">Start Time:</span>
+                    <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${isInputsAnimatingToText ? 'move-text-right' : ''}`}>Start Time:</span>
                     <span className={`text-blue-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
                       {`${startTime.hours}:${String(startTime.minutes).padStart(2, '0')}`}
                     </span>
@@ -2117,9 +2149,9 @@ const ElapsedTime = () => {
                 </div>
               )}
               {isTimeMovingUp && show24HourTimes && !clocksColored && (
-                <div className={`absolute left-[200px] transform -translate-x-1/2 top-[128px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'}`}>
+                <div className={`absolute left-[11rem] top-[128px] flex flex-col items-center gap-2 ${isEndTimeRising ? 'move-end-time-to-top' : 'text-animation'}`}>
                   <div className={`flex items-center gap-2 ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
-                    <span className="text-red-500 text-sm font-medium">End Time:</span>
+                    <span className={`text-red-500 text-sm font-medium whitespace-nowrap ${isInputsAnimatingToText ? 'move-text-right' : ''}`}>End Time:</span>
                     <span className={`text-red-500 text-sm font-medium ${isTextFadingOut ? 'fade-out-text' : ''}`}>
                       {`${endTime.hours}:${String(endTime.minutes).padStart(2, '0')}`}
                     </span>
@@ -2129,7 +2161,7 @@ const ElapsedTime = () => {
 
               {/* Arrow element */}
               {isTimeMovingUp && showArrows && showArrow && (
-                <div className={`absolute left-[205px] top-[128px] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'shrink-out-vertical' : ''}`}>
+                <div className={`absolute left-[11.5rem] top-[7.7rem] flex flex-col items-start gap-2 ${isTimeMovingUp ? 'move-to-top' : 'arrow-fade-in'} ${isArrowShrinking ? 'shrink-out-vertical' : ''}`}>
                   <div className="ml-12">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="#5750E3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -2142,9 +2174,9 @@ const ElapsedTime = () => {
               {clocksColored && showInputs && (
                 <>
                   {/* Interactive Start Time Input */}
-                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[72px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-start-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                  <div className={`absolute left-[11rem] top-[72px] flex flex-col items-start gap-2 w-[90vw] max-w-[280px] ${isInputsAnimatingToText ? 'move-start-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
                     <div className="flex items-center gap-2 w-full">
-                      <span className="text-blue-500 text-sm font-medium whitespace-nowrap">Start Time:</span>
+                      <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${isInputsAnimatingToText ? 'move-text-right' : ''}`}>Start Time:</span>
                       <div className="flex items-center gap-1 flex-nowrap">
                         {!isInputsAnimatingToText ? (
                           <>
@@ -2220,7 +2252,7 @@ const ElapsedTime = () => {
                               {startTimeAMPM}
                             </button>
                             {showStartTimeText && (
-                              <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${isStartTimeTextGrowing ? 'text-grow-in' : 'opacity-0'}`}>
+                              <span className={`text-blue-500 text-sm font-medium whitespace-nowrap ${isStartTimeTextGrowing ? 'text-grow-in move-text-right' : 'opacity-0'}`}>
                                 {showStartTime24Hour
                                   ? getStartTime24Hour()
                                   : isStartTimeAnimating
@@ -2229,7 +2261,7 @@ const ElapsedTime = () => {
                               </span>
                             )}
                             {showStartTimePlus12 && (
-                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap ${isStartTimePlus12Growing ? 'text-grow-in' : isStartTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
+                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap hide-plus12-mobile ${isStartTimePlus12Growing ? 'text-grow-in move-text-right' : isStartTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
                                 +12 hours
                               </span>
                             )}
@@ -2240,9 +2272,9 @@ const ElapsedTime = () => {
                   </div>
 
                   {/* Interactive End Time Input */}
-                  <div className={`absolute left-[345px] transform -translate-x-1/2 top-[37px] flex flex-col items-start gap-2 w-[280px] ${isInputsAnimatingToText ? 'move-end-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
+                  <div className={`absolute left-[11rem] top-[37px] flex flex-col items-start gap-2 w-[90vw] max-w-[280px] ${isInputsAnimatingToText ? 'move-end-time-down' : ''} ${isInputsMovingLeft ? 'move-inputs-left' : ''}`}>
                     <div className={`flex items-center gap-2 w-full ${showUnderline && !hideUnderline ? 'shift-right' : ''}`}>
-                      <span className="text-red-500 text-sm font-medium whitespace-nowrap">End Time:</span>
+                      <span className={`text-red-500 text-sm font-medium whitespace-nowrap ${isInputsAnimatingToText ? 'move-text-right' : ''}`}>End Time:</span>
                       <div className="flex items-center gap-1 flex-nowrap">
                         {!isInputsAnimatingToText ? (
                           <>
@@ -2298,7 +2330,7 @@ const ElapsedTime = () => {
                               {endTimeAMPM}
                             </button>
                             {showEndTimeText && (
-                              <span className={`text-red-500 text-sm font-medium whitespace-nowrap ${isEndTimeTextGrowing ? 'text-grow-in' : 'opacity-0'}`}>
+                              <span className={`text-red-500 text-sm font-medium whitespace-nowrap ${isEndTimeTextGrowing ? 'text-grow-in move-text-right' : 'opacity-0'}`}>
                                 {(isEndTimePlus24Animating && endTimePlus24AnimationStep > 0)
                                   ? getEndTimeWith24Hours()
                                   : showEndTime24Hour
@@ -2311,12 +2343,12 @@ const ElapsedTime = () => {
                               </span>
                             )}
                             {showEndTimePlus12 && (
-                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap ${isEndTimePlus12Growing ? 'text-grow-in' : isEndTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
+                              <span className={`text-black font-bold text-xs ml-1 whitespace-nowrap hide-plus12-mobile ${isEndTimePlus12Growing ? 'text-grow-in move-text-right' : isEndTimePlus12MovingLeft ? 'plus12-move-left' : 'opacity-0'}`}>
                                 +12 hours
                               </span>
                             )}
                             {showEndTimePlus24 && (
-                              <span className={`text-black font-bold text-xs whitespace-nowrap ${isEndTimePlus24Growing ? 'text-grow-in' : isEndTimePlus24MovingLeft ? 'plus12-move-left' : 'opacity-0'}`} style={{ marginLeft: endTimeAMPM === 'PM' ? '-60px' : '5px' }}>
+                              <span className={`text-black font-bold text-xs whitespace-nowrap ${isEndTimePlus24Growing ? 'text-grow-in move-text-right' : isEndTimePlus24MovingLeft ? 'plus12-move-left' : 'opacity-0'}`} style={{ marginLeft: endTimeAMPM === 'PM' ? '-60px' : '5px' }}>
                                 +24 hours
                               </span>
                             )}
@@ -2329,47 +2361,44 @@ const ElapsedTime = () => {
               )}
               {showUnderline && (
                 <>
-                  <div className={`absolute left-[200px] transform -translate-x-1/2 top-[108px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '200px' : '150px' }} />
-                  <div className={`absolute left-[185px] top-[88px] w-[8px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} />
-                </>
-              )}
-              {showElapsedTime && (
-                <div className={`absolute left-[199px] transform -translate-x-1/2 top-[120px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
-                  <span>
-                    Elapsed Time: 
-                    {!showInputs ? (
-                      // Show calculated answer when elapsed time first appears (before inputs)
-                      <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
-                        {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
-                      </span>
-                    ) : isInputsDirty && !showElapsedTimeAnswer ? (
-                      // Show question marks only when inputs are dirty (changed by user) and answer is not shown
-                      <span className={isElapsedTimeFadingOut ? 'fade-out-text' : ''}>
-                        {' ?h ?m'}
-                      </span>
-                    ) : (
-                      // Show calculated answer when inputs are not dirty or after solve animation
-                      <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
-                        {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
-                      </span>
+                  <div className={`absolute left-[11rem] top-[108px] h-[2px] bg-[#5750E3] ${isUnderlineMovingLeft ? 'move-underline-left' : hideUnderline ? 'shrink-out' : 'grow-in-line'}`} style={{ width: showInputs ? '70vw' : '40vw', maxWidth: showInputs ? '200px' : '150px' }} />
+                  <div className={`absolute left-[11rem] top-[120px] text-[#5750E3] text-sm font-medium ${isElapsedTimeMovingLeft ? 'move-elapsed-time-left' : isElapsedTimeRising ? 'rise-up' : 'fade-in-down'}`}>
+                    <span>
+                      Elapsed Time: 
+                      {!showInputs ? (
+                        // Show calculated answer when elapsed time first appears (before inputs)
+                        <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
+                          {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
+                        </span>
+                      ) : isInputsDirty && !showElapsedTimeAnswer ? (
+                        // Show question marks only when inputs are dirty (changed by user) and answer is not shown
+                        <span className={isElapsedTimeFadingOut ? 'fade-out-text' : ''}>
+                          {' ?h ?m'}
+                        </span>
+                      ) : (
+                        // Show calculated answer when inputs are not dirty or after solve animation
+                        <span className={isElapsedTimeFadingIn ? 'fade-in-down' : ''}>
+                          {` ${calculateElapsedTime().hours}h ${calculateElapsedTime().minutes}m`}
+                        </span>
+                      )}
+                    </span>
+                    {showSolveButton && (
+                      <div className="glow-button simple-glow absolute" style={{ padding: '5px', right: '-4rem', bottom: '-0.5rem' }}>
+                        <button
+                          onClick={handleSolve}
+                          className="bg-[#008545] text-white text-xs px-2 py-1 rounded hover:bg-[#00783E] transition-colors"
+                        >
+                          Solve
+                        </button>
+                      </div>
                     )}
-                  </span>
-                  {showSolveButton && (
-                    <div className="glow-button simple-glow absolute left-[143px] top-[-6px]" style={{ bottom: 'auto', right: 'auto', padding: '5px' }}>
-                      <button
-                        onClick={handleSolve}
-                        className="bg-[#008545] text-white text-xs px-2 py-1 rounded hover:bg-[#00783E] transition-colors"
-                      >
-                        Solve
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                </>
               )}
               
               {/* Flexi Speech Bubble Section - Now inside the container */}
               {(showWelcomeMessage || showText || showExplanation || showFinalText || showCompletionText) && (
-                <div className="absolute left-0 bottom-0 w-full h-full flex items-end justify-start pointer-events-none">
+                <div className="absolute left-0 bottom-0 w-full h-full flex items-end justify-start pointer-events-none px-2 sm:px-0">
                   {showWelcomeMessage && (
                     <div className={`flexi-wave-bubble-container ${isWelcomeFadingOut ? 'flexi-first-step-fade-out' : ''}`}>
                       <img src={FlexiWave} alt="Flexi Wave" className="flexi-wave-bottom-left" />
